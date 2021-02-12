@@ -1,4 +1,4 @@
-package fr.dutapp.tenky.ui.notifications;
+package fr.dutapp.tenky.ui.all_cities;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

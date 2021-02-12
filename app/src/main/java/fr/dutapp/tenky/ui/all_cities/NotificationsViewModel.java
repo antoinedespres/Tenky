@@ -1,4 +1,4 @@
-package fr.dutapp.tenky.ui.notifications;
+package fr.dutapp.tenky.ui.all_cities;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -10,7 +10,7 @@ public class NotificationsViewModel extends ViewModel {
 
     public NotificationsViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is notifications fragment");
+        mText.setValue("This is all_cities fragment");
     }
 
     public LiveData<String> getText() {
