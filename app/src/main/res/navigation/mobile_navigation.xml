@@ -8,18 +8,18 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="fr.dutapp.tenky.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:label="@string/title_main"
         tools:layout="@layout/fragment_home" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="fr.dutapp.tenky.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
+        android:label="@string/title_search"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="fr.dutapp.tenky.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
+        android:name="fr.dutapp.tenky.ui.all_cities.NotificationsFragment"
+        android:label="@string/title_all_cities"
         tools:layout="@layout/fragment_notifications" />
 </navigation>
