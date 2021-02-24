@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tenky</string>
-    <string name="title_main">Accueil</string>
+    <string name="title_main">Météo</string>
     <string name="title_search">Recherche</string>
     <string name="title_all_cities">Villes</string>
+    <string name="title_settings">Réglages</string>
+    <string name="title_textview_dailyJ1">Demain</string>
+    <string name="bg_description">Fond correspondant à la météo actuelle</string>
+    <string name="title_sunrise">"Lever "</string>
+    <string name="title_sunset">Coucher</string>
+    <string name="title_wind_speed">Vitesse du vent</string>
 </resources>
