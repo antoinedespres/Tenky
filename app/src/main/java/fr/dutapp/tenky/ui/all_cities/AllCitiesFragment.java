@@ -1,4 +1,4 @@
-package fr.dutapp.tenky.ui.dashboard;
+package fr.dutapp.tenky.ui.all_cities;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import androidx.lifecycle.ViewModelProvider;
 
 import fr.dutapp.tenky.R;
 
-public class DashboardFragment extends Fragment {
+public class AllCitiesFragment extends Fragment {
 
-    private DashboardViewModel dashboardViewModel;
+    private AllCitiesViewModel allCitiesViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        dashboardViewModel =
-                new ViewModelProvider(this).get(DashboardViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        final TextView textView = root.findViewById(R.id.text_dashboard);
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        allCitiesViewModel =
+                new ViewModelProvider(this).get(AllCitiesViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_all_cities, container, false);
+        final TextView textView = root.findViewById(R.id.text_notifications);
+        allCitiesViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

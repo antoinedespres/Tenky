@@ -1,4 +1,4 @@
-package fr.dutapp.tenky.ui.all_cities;
+package fr.dutapp.tenky.ui.settings;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,20 +14,19 @@ import androidx.lifecycle.ViewModelProvider;
 
 import fr.dutapp.tenky.R;
 
-public class NotificationsFragment extends Fragment {
+public class SettingsFragment extends Fragment {
 
-    private NotificationsViewModel notificationsViewModel;
+    private SettingsViewModel settingsViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        notificationsViewModel =
-                new ViewModelProvider(this).get(NotificationsViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_notifications, container, false);
-        final TextView textView = root.findViewById(R.id.text_notifications);
-        notificationsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        settingsViewModel =
+                new ViewModelProvider(this).get(SettingsViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_settings, container, false);
+        settingsViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
-                textView.setText(s);
+                // textView.setText(s);
             }
         });
         return root;
