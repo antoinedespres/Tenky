@@ -18,4 +18,6 @@
     <string name="title_sunrise">Sunrise</string>
     <string name="title_sunset">Sunset</string>
     <string name="title_wind_speed">Wind speed</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
