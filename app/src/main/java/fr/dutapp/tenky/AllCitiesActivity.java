@@ -24,6 +24,7 @@ public class AllCitiesActivity extends AppCompatActivity {
 
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -31,13 +32,14 @@ public class AllCitiesActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
         switch(id) {
             case R.id.navigation_all_cities:
                 startActivity(new Intent(this, AllCitiesActivity.class));
+                finish();
                 break;
             case R.id.navigation_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
+                finish();
                 break;
         }
 
