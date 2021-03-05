@@ -18,11 +18,11 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         // TODO, au clic sur une des villes de la liste on charge la MainActivity
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(CITY_NAME, "Bordeaux");
-        setResult(RESULT_OK, intent);
-        startActivityForResult(intent, SETTINGS_ACTIVITY_REQUEST_CODE);
-        finish();
+        //Intent intent = new Intent(this, MainActivity.class);
+        //intent.putExtra(CITY_NAME, "Bordeaux");
+        //setResult(RESULT_OK, intent);
+        //startActivityForResult(intent, SETTINGS_ACTIVITY_REQUEST_CODE);
+        //finish();
     }
 
     @Override
@@ -46,9 +46,11 @@ public class SettingsActivity extends AppCompatActivity {
         switch(id) {
             case R.id.navigation_all_cities:
                 startActivity(new Intent(this, AllCitiesActivity.class));
+                finish();
                 break;
             case R.id.navigation_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
+                finish();
                 break;
         }
 

@@ -80,9 +80,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         //BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_settings, R.id.navigation_all_cities)
-                .build();
+
 
         try {
             mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
