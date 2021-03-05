@@ -32,6 +32,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,11 +77,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-
-        //BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-
 
         try {
             mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -162,31 +158,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         //NavigationUI.setupWithNavController(navView, navController);
 
-        String theurl = "https://api.openweathermap.org/data/2.5/onecall?lat=" + mLat + "&lon=" + mLon + "&appid=6b9eb0c4a410dfaf06f6fa358eb6ffba";
+        weather(48.95, 2.38);
 
-        StringRequest str = new StringRequest(Request.Method.GET, theurl, response -> {
-            try {
-                JSONObject jsonObject = new JSONObject(response);
-                JSONObject object = jsonObject.getJSONObject("current");
-                double temp = object.getDouble("temp");
-
-                int timezone = jsonObject.getInt("timezone_offset");
-
-                Date sunrise = new Date((object.getLong("sunrise") + timezone)*1000);
-                Date sunset = new Date((object.getLong("sunset") + timezone)*1000);
-
-                mSunrise.setText(format.format(sunrise) + "");
-                mSunset.setText(format.format(sunset) +"");
-
-                mTemperature.setText(temp + " °K");
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }, error -> Toast.makeText(MainActivity.this,error.getLocalizedMessage(),Toast.LENGTH_SHORT).show());
-
-        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
-        requestQueue.add(str);
     }
 
     @Override
@@ -215,21 +188,70 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
+    /*@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == SETTINGS_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-            String city = data.getStringExtra(CITY_NAME);
-            if(city == null) {
-                API.getWeather("Paris");
-            } else {
-                API.getWeather(city);
+        try {
+            if (requestCode == SETTINGS_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+                String city = data.getStringExtra(CITY_NAME);
+                API api  = new API(city);
+                if (city == null) {
+                    api.getWeather("Paris");
+                } else {
+                    api.getWeather(city);
+                }
             }
+            super.onActivityResult(requestCode, resultCode, data);
+        }catch(Exception e){
+
         }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+    }*/
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
+    }
+
+/*    public void weather(double lat, double lon){
+        try {
+            API api = new API(lat, lon, MainActivity.this);
+
+            mCityName.setText(API.getCityName(lat, lon));
+            mSunrise.setText(api.getTimes().get(1));
+            mSunset.setText(api.getTimes().get(2));
+            mWindSpeed.setText(api.getWind().get(0).toString());
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }*/
+
+    public void weather(double lat, double lon){
+        String theUrl = API.url +lat+"&lon="+lon+"&appid="+API.apiKey;
+
+        StringRequest str = new StringRequest(Request.Method.GET, theUrl, response -> {
+            try {
+                JSONObject resp = new JSONObject(response);
+                JSONObject current = resp.getJSONObject("current");
+                JSONArray hourly = resp.getJSONArray("hourly");
+                JSONArray daily = resp.getJSONArray("daily");
+
+                mTemperature.setText(current.getDouble("temp") +"");
+                /*this.weather = this.getCurrentWeather();
+                this.temp = this.getTemp();
+                this.wind = this.getWind();
+                this.times = this.getTimes();*/
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }, error -> {
+            try {
+                throw new Exception("Bad URL request");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
+        requestQueue.add(str);
     }
 }
