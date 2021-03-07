@@ -13,21 +13,30 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Tenky">
-        <activity android:name=".SettingsActivity"></activity>
-        <activity android:name=".AllCitiesActivity" />
-        <activity android:name=".SplashScreenActivity">
+
+        <activity android:name=".SettingsActivity"
+            android:screenOrientation="sensorPortrait"/>
+
+        <activity android:name=".AllCitiesActivity"
+            android:screenOrientation="sensorPortrait">
+        </activity>
+        <activity android:name=".SplashScreenActivity"
+            android:screenOrientation="sensorPortrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
 
+        </activity>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="sensorPortrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
