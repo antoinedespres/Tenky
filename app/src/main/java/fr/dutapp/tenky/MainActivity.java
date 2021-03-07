@@ -3,6 +3,7 @@ package fr.dutapp.tenky;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -39,28 +40,27 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 import fr.dutapp.tenky.ui.API;
 
-import static fr.dutapp.tenky.SettingsActivity.CITY_NAME;
 import static fr.dutapp.tenky.SettingsActivity.SETTINGS_ACTIVITY_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     private static final long MIN_TIME_BW_UPDATES = 1000;
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 50;
+
     private TextView mTemperature;
     private TextView mCityName;
-    private TextView mSunrise;
-    private TextView mSunset;
-    private TextView mWindSpeed;
+    private TextView mSunrise, mSunset, mWindSpeed;
     private TextView mJ3text;
     private TextView mJ4text;
     private LocationManager mLocationManager;
-    private double mLat;
-    private double mLon;
+    private double mLat, mLon;
     private Location mLocation;
+    private boolean mUseCelsius;
 
 
     @Override
@@ -74,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mWindSpeed = findViewById(R.id.textViewWindSpeedValue);
         mJ3text = findViewById(R.id.textViewJ3);
         mJ4text = findViewById(R.id.textViewJ4);
+
+        SharedPreferences prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         SimpleDateFormat format = new SimpleDateFormat("HH:mm");
@@ -154,12 +157,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             e.printStackTrace();
         }
 
-        //NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        //NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        //NavigationUI.setupWithNavController(navView, navController);
+        weather(mLat, mLon);
 
-        weather(48.95, 2.38);
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
     }
 
     @Override
@@ -253,5 +259,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
         RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
         requestQueue.add(str);
+    }
+
+    private static String getDefaultSharedPreferencesName(Context context) {
+        return context.getPackageName() + "_preferences";
     }
 }

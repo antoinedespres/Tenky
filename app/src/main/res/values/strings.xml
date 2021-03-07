@@ -13,11 +13,12 @@
     <string name="title_textview_dailyJ8" translatable="false">J+8</string>
     <string name="title_textview_dailyJ9" translatable="false">J+9</string>
     <string name="title_no_data" translatable="false">-</string>
-    <string name="bg_description">" Background corresponding to the current weather"</string>
+    <string name="bg_description">Background corresponding to the current weather</string>
     <string name="title_search">Search</string>
     <string name="title_sunrise">Sunrise</string>
     <string name="title_sunset">Sunset</string>
     <string name="title_wind_speed">Wind speed</string>
+    <string name="settings_temperature_unit_desc">Choose between °F and °C</string>
+    <string name="settings_temperature_unit">Temperature unit</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

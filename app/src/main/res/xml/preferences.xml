@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        app:key="temperatureUnit"
+        app:iconSpaceReserved="false"
+        app:title="@string/settings_temperature_unit"
+        app:summary="@string/settings_temperature_unit_desc"/>
+
+    <Preference
+        app:key="feedback"
+        app:iconSpaceReserved="false"
+        app:title="Send feedback"
+        app:summary="Report technical issues or suggest new features"/>
+
+</PreferenceScreen>

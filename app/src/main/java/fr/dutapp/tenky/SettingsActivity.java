@@ -1,28 +1,29 @@
 package fr.dutapp.tenky;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceFragmentCompat;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.Map;
 
 public class SettingsActivity extends AppCompatActivity {
 
     public static final int  SETTINGS_ACTIVITY_REQUEST_CODE = 2;
-    public static final String CITY_NAME = "CITY_NAME";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-
-        // TODO, au clic sur une des villes de la liste on charge la MainActivity
-        //Intent intent = new Intent(this, MainActivity.class);
-        //intent.putExtra(CITY_NAME, "Bordeaux");
-        //setResult(RESULT_OK, intent);
-        //startActivityForResult(intent, SETTINGS_ACTIVITY_REQUEST_CODE);
-        //finish();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.settings_container, new SettingsFragment())
+                .commit();
     }
 
     @Override
