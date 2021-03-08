@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import static fr.dutapp.tenky.MainActivity.MAIN_ACTIVITY_REQUEST_CODE;
 
 public class AllCitiesActivity extends AppCompatActivity {
     public static final int  ALL_CITIES_ACTIVITY_REQUEST_CODE = 2;
@@ -16,6 +19,18 @@ public class AllCitiesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_cities);
+
+        new Handler().postDelayed(() -> {
+
+            Intent intent = new Intent(AllCitiesActivity.this, MainActivity.class);
+            intent.putExtra(LATITUDE_COORDINATES, 39.0);
+            intent.putExtra(LONGITUDE_COORDINATES, 125.0);
+            setResult(RESULT_OK, intent);
+            finish();
+
+        }, 800);
+
+
     }
 
     @Override
