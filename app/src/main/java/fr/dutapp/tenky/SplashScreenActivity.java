@@ -15,13 +15,11 @@ public class SplashScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
         getSupportActionBar().hide();
 
-        final Handler handler = new Handler();
-        handler.postDelayed(() -> {
+        new Handler().postDelayed(() -> {
             startActivity(new Intent(SplashScreenActivity.this, MainActivity.class));
 
-            // prevents the user from using the return button to go back to the splash screen
             finish();
-        }, 1000);
+        }, 800);
 
     }
 }

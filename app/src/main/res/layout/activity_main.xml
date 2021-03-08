@@ -47,7 +47,6 @@
                     android:layout_height="33dp"
                     android:layout_marginStart="320dp"
                     android:layout_marginTop="12dp"
-                    android:src="@drawable/ic__10_sun"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -58,7 +57,6 @@
                     android:layout_marginStart="320dp"
                     android:layout_marginTop="48dp"
                     android:contentDescription="TODO"
-                    android:src="@drawable/ic__10_sun"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -69,7 +67,6 @@
                     android:layout_marginStart="320dp"
                     android:layout_marginTop="92dp"
                     android:contentDescription="TODO"
-                    android:src="@drawable/ic__10_sun"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -79,7 +76,6 @@
                     android:layout_height="35dp"
                     android:layout_marginStart="320dp"
                     android:layout_marginTop="132dp"
-                    android:src="@drawable/ic__10_sun"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -89,7 +85,6 @@
                     android:layout_height="34dp"
                     android:layout_marginStart="320dp"
                     android:layout_marginTop="216dp"
-                    android:src="@drawable/ic__10_sun"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -99,7 +94,6 @@
                     android:layout_height="34dp"
                     android:layout_marginStart="320dp"
                     android:layout_marginTop="256dp"
-                    android:src="@drawable/ic__10_sun"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -109,7 +103,6 @@
                     android:layout_height="36dp"
                     android:layout_marginStart="320dp"
                     android:layout_marginTop="172dp"
-                    android:src="@drawable/ic__10_sun"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -430,7 +423,7 @@
                 android:layout_height="219dp"
                 android:background="#60ACACAC"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="0dp">
+                tools:layout_editor_absoluteX="-16dp">
 
                 <ImageView
                     android:id="@+id/imageCurrentWea"
@@ -443,8 +436,8 @@
 
                 <TextView
                     android:id="@+id/CityValue"
-                    android:layout_width="241dp"
-                    android:layout_height="68dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
                     android:text="cityname"
@@ -454,31 +447,26 @@
 
                 <TextView
                     android:id="@+id/TemperatureValue"
-                    android:layout_width="54dp"
-                    android:layout_height="21dp"
-                    android:layout_marginStart="88dp"
-                    android:layout_marginTop="88dp"
-                    android:text="T°"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/title_no_data"
+                    android:textSize="30sp"
+                    app:layout_constraintStart_toEndOf="@+id/imageCurrentWea"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <HorizontalScrollView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:layout_marginBottom="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:orientation="vertical" >
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
-                    </LinearLayout>
+                        android:orientation="vertical" />
                 </HorizontalScrollView>
 
                 <TextView
@@ -529,19 +517,10 @@
                     android:layout_marginTop="100dp"
                     android:text="TextView"
                     android:textAlignment="inherit"
-                    android:textSize="24sp"
+                    android:textSize="18sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginTop="88dp"
-                    android:text="@string/title_temp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

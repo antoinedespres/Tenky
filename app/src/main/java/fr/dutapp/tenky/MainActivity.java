@@ -39,10 +39,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+import static fr.dutapp.tenky.AllCitiesActivity.ALL_CITIES_ACTIVITY_REQUEST_CODE;
+
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
-    private static final long MIN_TIME_BW_UPDATES = 1000;
-    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 50;
+    public static final int  MAIN_ACTIVITY_REQUEST_CODE = 1;
+
+    private static final long MIN_TIME_BW_UPDATES = 300000;
+    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5000;
     public final static String apiKey = "6b9eb0c4a410dfaf06f6fa358eb6ffba";
     public final static String url = "https://api.openweathermap.org/data/2.5/onecall?lat=";
 
@@ -71,8 +75,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private TextView mJ5MMtext;
     private TextView mJ6MMtext;
     private TextView mJ7MMtext;
-    private TextView mJ8MMtext;
-    private TextView mJ9MMtext;
+
     private TextView mFeelsLike;
     private TextView mMinTemp;
     private TextView mMaxTemp;
@@ -91,11 +94,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private ImageView mWeaJ6;
     private ImageView mWeaJ7;
     private Map iconMap;
+    private SharedPreferences prefs;
 
 
-
-
-    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -159,10 +160,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         iconMap.put("ic_50d", R.drawable.ic_50d);
         iconMap.put("ic_50n", R.drawable.ic_50n);
 
-        SharedPreferences prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        this.prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
         this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
 
 
+        getCoordinates();
+        displayWeather(mLat, mLon);
+    }
+
+    public void getCoordinates() {
         try {
             mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -218,15 +224,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        displayWeather(mLat, mLon);
     }
 
+    /**
+     * Reloads weather after restarting the Activity, handles settings changes
+     */
     @Override
-    public void onResume() {
-        super.onResume();
-        SharedPreferences prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
+    public void onRestart() {
+        super.onRestart();
+        mUseCelsius = prefs.getBoolean("temperatureUnit", true);
+        displayWeather(mLat, mLon);
     }
 
     @Override
@@ -238,14 +245,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch(id) {
+        switch (id) {
             case R.id.navigation_all_cities:
-                startActivity(new Intent(this, AllCitiesActivity.class));
+                Intent intent = new Intent(this, AllCitiesActivity.class);
+                startActivityForResult(intent, ALL_CITIES_ACTIVITY_REQUEST_CODE);
                 break;
             case R.id.navigation_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
@@ -255,43 +260,37 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return super.onOptionsItemSelected(item);
     }
 
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        try {
-            if (requestCode == SETTINGS_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-                String city = data.getStringExtra(CITY_NAME);
-                API api  = new API(city);
-                if (city == null) {
-                    api.getWeather("Paris");
-                } else {
-                    api.getWeather(city);
-                }
-            }
-            super.onActivityResult(requestCode, resultCode, data);
-        }catch(Exception e){
-
-        }
-    }*/
-
     @Override
     public void onLocationChanged(@NonNull Location location) {
-
+        Log.d("locationchanged", "moved!!");
+        //getCoordinates();
+        //displayWeather(mLat, mLon);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        mLat = data.getDoubleExtra(AllCitiesActivity.LATITUDE_COORDINATES, 48.86);
-        mLon = data.getDoubleExtra(AllCitiesActivity.LONGITUDE_COORDINATES, 2.34);
-        displayWeather(mLat, mLon);
+        if (ALL_CITIES_ACTIVITY_REQUEST_CODE == requestCode && RESULT_OK == resultCode) {
+            Log.d("activityforresult", "%%%%%%%%%%%%");
+            // Default location: Paris, France
+            mLat = data.getDoubleExtra(AllCitiesActivity.LATITUDE_COORDINATES, 48.86);
+            mLon = data.getDoubleExtra(AllCitiesActivity.LONGITUDE_COORDINATES, 2.34);
+            displayWeather(mLat, mLon);
+        }
 
     }
 
-    public void displayWeather(double mLat, double mLon){
-                String theUrl = url +mLat+"&lon="+mLon+"&appid="+apiKey;
+    /**
+     * Calls the API with coordinates and displays the weather in MainActivity
+     *
+     * @param lat Latitude coordinate
+     * @param lon Longitude coordinate
+     */
+    public void displayWeather(double lat, double lon) {
+        String fullURL = url + lat + "&lon=" + lon + "&appid=" + apiKey;
 
-        StringRequest str = new StringRequest(Request.Method.GET, theUrl, response -> {
+        StringRequest str = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
                 JSONObject resp = new JSONObject(response);
                 JSONObject current = resp.getJSONObject("current");
@@ -301,10 +300,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                 SimpleDateFormat fora = new SimpleDateFormat("E");
 
-
-                mTemperature.setText(String.format("%.2g",current.getDouble("temp") - 272.15)+"°");
-                mHumidity.setText(current.getDouble("humidity")+"");
-                mFeelsLike.setText(String.format("%.2g",current.getDouble("feels_like") - 272.15)+"°" );
+                mTemperature.setText(String.format("%.2g", convertTemp(current.getDouble("temp"))) + "°");
+                mHumidity.setText(current.getDouble("humidity") + " %");
+                mFeelsLike.setText(String.format("%.2g", convertTemp(current.getDouble("feels_like"))) + "°");
                 JSONArray w = current.getJSONArray("weather");
                 mDesc.setText(w.getJSONObject(0).getString("description"));
 
@@ -328,30 +326,30 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 Log.d("jsp", day3.toString());
 
 
-                mTomorrowtext.setText(String.format("%.2g", tomorrow.getJSONObject("temp").getDouble("day")- 272.15)+"°");
-                mTomorrowMMtext.setText(String.format("%.2g", tomorrow.getJSONObject("temp").getDouble("max")- 272.15)+"°/"+String.format("%.2g", tomorrow.getJSONObject("temp").getDouble("min")- 272.15)+"°");
+                mTomorrowtext.setText(String.format("%.2g", convertTemp(tomorrow.getJSONObject("temp").getDouble("day"))) + "°");
+                mTomorrowMMtext.setText(String.format("%.2g", convertTemp(tomorrow.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(tomorrow.getJSONObject("temp").getDouble("min"))) + "°");
 
-                mJ2text.setText(String.format("%.2g", day2.getJSONObject("temp").getDouble("day")- 272.15)+"°");
-                mJ2MMtext.setText(String.format("%.2g", day2.getJSONObject("temp").getDouble("max")- 272.15)+"°/"+String.format("%.2g", day2.getJSONObject("temp").getDouble("min")- 272.15)+"°");
+                mJ2text.setText(String.format("%.2g", convertTemp(day2.getJSONObject("temp").getDouble("day"))) + "°");
+                mJ2MMtext.setText(String.format("%.2g", convertTemp(day2.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day2.getJSONObject("temp").getDouble("min"))) + "°");
 
-                mJ3text.setText(String.format("%.2g", day3.getJSONObject("temp").getDouble("day")- 272.15)+"°");
-                mJ3MMtext.setText(String.format("%.2g", day3.getJSONObject("temp").getDouble("max")- 272.15)+"°/"+String.format("%.2g", day3.getJSONObject("temp").getDouble("min")- 272.15)+"°");
+                mJ3text.setText(String.format("%.2g", convertTemp(day3.getJSONObject("temp").getDouble("day"))) + "°");
+                mJ3MMtext.setText(String.format("%.2g", convertTemp(day3.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day3.getJSONObject("temp").getDouble("min"))) + "°");
 
-                mJ4text.setText(String.format("%.2g", day4.getJSONObject("temp").getDouble("day")- 272.15)+"°");
-                mJ4MMtext.setText(String.format("%.2g", day4.getJSONObject("temp").getDouble("max")- 272.15)+"°/"+String.format("%.2g", day4.getJSONObject("temp").getDouble("min")- 272.15)+"°");
+                mJ4text.setText(String.format("%.2g", convertTemp(day4.getJSONObject("temp").getDouble("day"))) + "°");
+                mJ4MMtext.setText(String.format("%.2g", convertTemp(day4.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day4.getJSONObject("temp").getDouble("min"))) + "°");
 
-                mJ5text.setText(String.format("%.2g", day5.getJSONObject("temp").getDouble("day")- 272.15)+"°");
-                mJ5MMtext.setText(String.format("%.2g", day5.getJSONObject("temp").getDouble("max")- 272.15)+"°/"+String.format("%.2g", day5.getJSONObject("temp").getDouble("min")- 272.15)+"°");
+                mJ5text.setText(String.format("%.2g", convertTemp(day5.getJSONObject("temp").getDouble("day"))) + "°");
+                mJ5MMtext.setText(String.format("%.2g", convertTemp(day5.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day5.getJSONObject("temp").getDouble("min"))) + "°");
 
-                mJ6text.setText(String.format("%.2g", day6.getJSONObject("temp").getDouble("day")- 272.15)+"°");
-                mJ6MMtext.setText(String.format("%.2g", day6.getJSONObject("temp").getDouble("max")- 272.15)+"°/"+String.format("%.2g", day6.getJSONObject("temp").getDouble("min")- 272.15)+"°");
+                mJ6text.setText(String.format("%.2g", convertTemp(day6.getJSONObject("temp").getDouble("day"))) + "°");
+                mJ6MMtext.setText(String.format("%.2g", convertTemp(day6.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day6.getJSONObject("temp").getDouble("min"))) + "°");
 
-                mJ7text.setText(String.format("%.2g", day7.getJSONObject("temp").getDouble("day")- 272.15)+"°");
-                mJ7MMtext.setText(String.format("%.2g", day7.getJSONObject("temp").getDouble("max")- 272.15)+"°/"+String.format("%.2g", day7.getJSONObject("temp").getDouble("min")- 272.15)+"°");
+                mJ7text.setText(String.format("%.2g", convertTemp(day7.getJSONObject("temp").getDouble("day"))) + "°");
+                mJ7MMtext.setText(String.format("%.2g", convertTemp(day7.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day7.getJSONObject("temp").getDouble("min"))) + "°");
 
-                mWindSpeed.setText(String.format("%.2g", current.getDouble("wind_speed")));
+                // wind speed in kph
+                mWindSpeed.setText(String.format("%.2g", current.getDouble("wind_speed") * 3.6 ) + " km/h");
 
-                //Picasso.get().load("http://openweathermap.org/img/wn/"+w.getJSONObject(0).getString("icon")+"@4x.png").into(mcurrWea);
                 mcurrWea.setImageResource((int) this.iconMap.get("ic_" + w.getJSONObject(0).getString("icon")));
 
                 mWeaTom.setImageResource((int) this.iconMap.get("ic_" + tomorrow.getJSONArray("weather").getJSONObject(0).getString("icon")));
@@ -362,15 +360,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 mWeaJ6.setImageResource((int) this.iconMap.get("ic_" + day6.getJSONArray("weather").getJSONObject(0).getString("icon")));
                 mWeaJ7.setImageResource((int) this.iconMap.get("ic_" + day7.getJSONArray("weather").getJSONObject(0).getString("icon")));
 
-
-
                 mJ2.setText(fora.format(new Date((day2.getLong("dt") + timezone) * 1000)));
                 mJ3.setText(fora.format(new Date((day3.getLong("dt") + timezone) * 1000)));
                 mJ4.setText(fora.format(new Date((day4.getLong("dt") + timezone) * 1000)));
                 mJ5.setText(fora.format(new Date((day5.getLong("dt") + timezone) * 1000)));
                 mJ6.setText(fora.format(new Date((day6.getLong("dt") + timezone) * 1000)));
                 mJ7.setText(fora.format(new Date((day7.getLong("dt") + timezone) * 1000)));
-
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -386,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
         requestQueue.add(str);
 
-        String Url = "https://api.openweathermap.org/data/2.5/weather?lat="+mLat+"&lon="+mLon+"&appid="+apiKey;
+        String Url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
         StringRequest str2 = new StringRequest(Request.Method.GET, Url, response -> {
             try {
 
@@ -402,14 +397,22 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 e.printStackTrace();
             }
         });
-
-
-
         requestQueue.add(str2);
     }
 
-
+    /**
+     * Gets the default SharedPreferences' file name
+     *
+     * @param context
+     * @return Default SharedPreferences' file name
+     */
     public static final String getDefaultSharedPreferencesName(Context context) {
         return context.getPackageName() + "_preferences";
+    }
+
+    public double convertTemp(double temp) {
+        if (this.mUseCelsius)
+            return temp - 273.15;
+        return (temp - 273.15) * 9 / 5 + 32;
     }
 }
