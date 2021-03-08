@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -30,8 +32,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
@@ -85,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private ImageView mWeaJ5;
     private ImageView mWeaJ6;
     private ImageView mWeaJ7;
+    private Map iconMap;
 
 
 
@@ -133,9 +139,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mJ6 = findViewById(R.id.textViewJ6);
         mJ7 = findViewById(R.id.textViewJ7);
 
-
-
-
+        this.iconMap = new HashMap<String, Drawable>();
+        iconMap.put("ic_01d", R.drawable.ic_01d);
+        iconMap.put("ic_01n", R.drawable.ic_01n);
+        iconMap.put("ic_02d", R.drawable.ic_02d);
+        iconMap.put("ic_02n", R.drawable.ic_02n);
+        iconMap.put("ic_03d", R.drawable.ic_03d);
+        iconMap.put("ic_03n", R.drawable.ic_03n);
+        iconMap.put("ic_04d", R.drawable.ic_04d);
+        iconMap.put("ic_04n", R.drawable.ic_04n);
+        iconMap.put("ic_09d", R.drawable.ic_09d);
+        iconMap.put("ic_09n", R.drawable.ic_09n);
+        iconMap.put("ic_10d", R.drawable.ic_10d);
+        iconMap.put("ic_10n", R.drawable.ic_10n);
+        iconMap.put("ic_11d", R.drawable.ic_11d);
+        iconMap.put("ic_11n", R.drawable.ic_11n);
+        iconMap.put("ic_13d", R.drawable.ic_13d);
+        iconMap.put("ic_13n", R.drawable.ic_13n);
+        iconMap.put("ic_50d", R.drawable.ic_50d);
+        iconMap.put("ic_50n", R.drawable.ic_50n);
 
         SharedPreferences prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
         this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
@@ -154,8 +176,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             } else {
                 // First get location from Network Provider
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
+
                     String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
                     ActivityCompat.requestPermissions(this, permissions, 1);
                     // here to request the missing permissions, and then overriding
@@ -198,7 +219,77 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             e.printStackTrace();
         }
 
-        String theUrl = url +mLat+"&lon="+mLon+"&appid="+apiKey;
+        displayWeather(mLat, mLon);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        switch(id) {
+            case R.id.navigation_all_cities:
+                startActivity(new Intent(this, AllCitiesActivity.class));
+                break;
+            case R.id.navigation_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /*@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        try {
+            if (requestCode == SETTINGS_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+                String city = data.getStringExtra(CITY_NAME);
+                API api  = new API(city);
+                if (city == null) {
+                    api.getWeather("Paris");
+                } else {
+                    api.getWeather(city);
+                }
+            }
+            super.onActivityResult(requestCode, resultCode, data);
+        }catch(Exception e){
+
+        }
+    }*/
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        mLat = data.getDoubleExtra(AllCitiesActivity.LATITUDE_COORDINATES, 48.86);
+        mLon = data.getDoubleExtra(AllCitiesActivity.LONGITUDE_COORDINATES, 2.34);
+        displayWeather(mLat, mLon);
+
+    }
+
+    public void displayWeather(double mLat, double mLon){
+                String theUrl = url +mLat+"&lon="+mLon+"&appid="+apiKey;
 
         StringRequest str = new StringRequest(Request.Method.GET, theUrl, response -> {
             try {
@@ -260,15 +351,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                 mWindSpeed.setText(String.format("%.2g", current.getDouble("wind_speed")));
 
-                Picasso.get().load("http://openweathermap.org/img/wn/"+w.getJSONObject(0).getString("icon")+"@4x.png").into(mcurrWea);
+                //Picasso.get().load("http://openweathermap.org/img/wn/"+w.getJSONObject(0).getString("icon")+"@4x.png").into(mcurrWea);
+                mcurrWea.setImageResource((int) this.iconMap.get("ic_" + w.getJSONObject(0).getString("icon")));
 
-                Picasso.get().load("http://openweathermap.org/img/wn/"+tomorrow.getJSONArray("weather").getJSONObject(0).getString("icon")+"@4x.png").into(mWeaTom);
-                Picasso.get().load("http://openweathermap.org/img/wn/"+day2.getJSONArray("weather").getJSONObject(0).getString("icon")+"@4x.png").into(mWeaJ2);
-                Picasso.get().load("http://openweathermap.org/img/wn/"+day3.getJSONArray("weather").getJSONObject(0).getString("icon")+"@4x.png").into(mWeaJ3);
-                Picasso.get().load("http://openweathermap.org/img/wn/"+day4.getJSONArray("weather").getJSONObject(0).getString("icon")+"@4x.png").into(mWeaJ4);
-                Picasso.get().load("http://openweathermap.org/img/wn/"+day5.getJSONArray("weather").getJSONObject(0).getString("icon")+"@4x.png").into(mWeaJ5);
-                Picasso.get().load("http://openweathermap.org/img/wn/"+day6.getJSONArray("weather").getJSONObject(0).getString("icon")+"@4x.png").into(mWeaJ6);
-                Picasso.get().load("http://openweathermap.org/img/wn/"+day7.getJSONArray("weather").getJSONObject(0).getString("icon")+"@4x.png").into(mWeaJ7);
+                mWeaTom.setImageResource((int) this.iconMap.get("ic_" + tomorrow.getJSONArray("weather").getJSONObject(0).getString("icon")));
+                mWeaJ2.setImageResource((int) this.iconMap.get("ic_" + day2.getJSONArray("weather").getJSONObject(0).getString("icon")));
+                mWeaJ3.setImageResource((int) this.iconMap.get("ic_" + day3.getJSONArray("weather").getJSONObject(0).getString("icon")));
+                mWeaJ4.setImageResource((int) this.iconMap.get("ic_" + day4.getJSONArray("weather").getJSONObject(0).getString("icon")));
+                mWeaJ5.setImageResource((int) this.iconMap.get("ic_" + day5.getJSONArray("weather").getJSONObject(0).getString("icon")));
+                mWeaJ6.setImageResource((int) this.iconMap.get("ic_" + day6.getJSONArray("weather").getJSONObject(0).getString("icon")));
+                mWeaJ7.setImageResource((int) this.iconMap.get("ic_" + day7.getJSONArray("weather").getJSONObject(0).getString("icon")));
+
+
 
                 mJ2.setText(fora.format(new Date((day2.getLong("dt") + timezone) * 1000)));
                 mJ3.setText(fora.format(new Date((day3.getLong("dt") + timezone) * 1000)));
@@ -312,81 +406,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
 
         requestQueue.add(str2);
-
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        SharedPreferences prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        switch(id) {
-            case R.id.navigation_all_cities:
-                startActivity(new Intent(this, AllCitiesActivity.class));
-                break;
-            case R.id.navigation_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        try {
-            if (requestCode == SETTINGS_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-                String city = data.getStringExtra(CITY_NAME);
-                API api  = new API(city);
-                if (city == null) {
-                    api.getWeather("Paris");
-                } else {
-                    api.getWeather(city);
-                }
-            }
-            super.onActivityResult(requestCode, resultCode, data);
-        }catch(Exception e){
-
-        }
-    }*/
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-
-    }
-
-/*    public void weather(double lat, double lon){
-        try {
-            API api = new API(lat, lon, MainActivity.this);
-
-            mCityName.setText(API.getCityName(lat, lon));
-            mSunrise.setText(api.getTimes().get(1));
-            mSunset.setText(api.getTimes().get(2));
-            mWindSpeed.setText(api.getWind().get(0).toString());
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }*/
-
-
-    private static String getDefaultSharedPreferencesName(Context context) {
+    public static final String getDefaultSharedPreferencesName(Context context) {
         return context.getPackageName() + "_preferences";
     }
 }
