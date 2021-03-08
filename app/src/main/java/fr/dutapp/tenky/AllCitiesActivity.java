@@ -8,6 +8,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class AllCitiesActivity extends AppCompatActivity {
+    public static final int  ALL_CITIES_ACTIVITY_REQUEST_CODE = 2;
+    public static final String LATITUDE_COORDINATES = "LATITUDE_COORDINATES";
+    public static final String LONGITUDE_COORDINATES = "LONGITUDE_COORDINATES";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

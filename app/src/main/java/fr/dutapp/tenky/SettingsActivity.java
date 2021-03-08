@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    public static final int  SETTINGS_ACTIVITY_REQUEST_CODE = 2;
+    public static final int  SETTINGS_ACTIVITY_REQUEST_CODE = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
