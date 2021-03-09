@@ -282,6 +282,35 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     /**
+     * Display weather data from a city name
+     * @param cityName The name of the city
+     */
+    public void displayWeather(String cityName) {
+        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+apiKey;
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
+            try {
+                JSONObject resp = new JSONObject(response);
+                JSONObject coord = resp.getJSONObject("coord");
+                double lat = coord.getDouble("lat");
+                double lon = coord.getDouble("lon");
+                displayWeather(lat, lon);
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+        }, error -> {
+            try {
+                throw new Exception("Bad URL request");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
+        requestQueue.add(stringRequest);
+    }
+
+    /**
      * Calls the API with coordinates and displays the weather in MainActivity
      *
      * @param lat Latitude coordinate
@@ -381,6 +410,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
         requestQueue.add(str);
 
+        // second API call to get the name of the city
         String Url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
         StringRequest str2 = new StringRequest(Request.Method.GET, Url, response -> {
             try {
@@ -397,6 +427,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 e.printStackTrace();
             }
         });
+
         requestQueue.add(str2);
     }
 

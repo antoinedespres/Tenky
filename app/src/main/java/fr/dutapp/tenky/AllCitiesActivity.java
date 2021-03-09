@@ -1,24 +1,44 @@
 package fr.dutapp.tenky;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import static fr.dutapp.tenky.MainActivity.MAIN_ACTIVITY_REQUEST_CODE;
+import static fr.dutapp.tenky.MainActivity.getDefaultSharedPreferencesName;
 
 public class AllCitiesActivity extends AppCompatActivity {
+
     public static final int  ALL_CITIES_ACTIVITY_REQUEST_CODE = 2;
     public static final String LATITUDE_COORDINATES = "LATITUDE_COORDINATES";
     public static final String LONGITUDE_COORDINATES = "LONGITUDE_COORDINATES";
+    public static final String CITY_LIST = "CITY_LIST";
+
+    private SharedPreferences mPrefs;
+    private Set<String> mCityNames;
+
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_all_cities);
+
+        mRecyclerView = findViewById(R.id.recycler_view_all_cities);
+        mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        mCityNames = mPrefs.getStringSet(CITY_LIST, new HashSet<>(Arrays.asList("Paris")));
+
+        AllCitiesAdapter mAllCitiesAdapter = new AllCitiesAdapter(this, mCityNames);
 
         new Handler().postDelayed(() -> {
 
