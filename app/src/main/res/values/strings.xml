@@ -23,5 +23,9 @@
     <string name="title_humidity">Humidity</string>
     <string name="title_feels_like">Feels like</string>
     <string name="title_temp">Temperature</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="noname">No Name Entered</string>
+    <string name="ok" translatable="false">Ok</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

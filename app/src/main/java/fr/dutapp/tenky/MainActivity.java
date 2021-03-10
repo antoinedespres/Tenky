@@ -162,6 +162,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         this.prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
         this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
+        SharedPreferences.Editor edit = this.prefs.edit();
+        edit.putInt("nbrCities", 0);
 
 
         getCoordinates();

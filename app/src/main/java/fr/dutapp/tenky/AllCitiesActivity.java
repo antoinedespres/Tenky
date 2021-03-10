@@ -9,7 +9,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,13 +23,14 @@ import static fr.dutapp.tenky.MainActivity.getDefaultSharedPreferencesName;
 
 public class AllCitiesActivity extends AppCompatActivity {
 
-    public static final int  ALL_CITIES_ACTIVITY_REQUEST_CODE = 2;
+    public static final int ALL_CITIES_ACTIVITY_REQUEST_CODE = 2;
     public static final String LATITUDE_COORDINATES = "LATITUDE_COORDINATES";
     public static final String LONGITUDE_COORDINATES = "LONGITUDE_COORDINATES";
     public static final String CITY_LIST = "CITY_LIST";
 
     private SharedPreferences mPrefs;
-    private Set<String> mCityNames;
+    ArrayList<String> mCityNames;
+    private ImageButton mAdd;
 
     private RecyclerView mRecyclerView;
 
@@ -36,20 +41,22 @@ public class AllCitiesActivity extends AppCompatActivity {
 
         mRecyclerView = findViewById(R.id.recycler_view_all_cities);
         mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        mCityNames = mPrefs.getStringSet(CITY_LIST, new HashSet<>(Arrays.asList("Paris")));
+        mAdd = findViewById(R.id.imgButtonAdd);
 
-        AllCitiesAdapter mAllCitiesAdapter = new AllCitiesAdapter(this, mCityNames);
+        mCityNames = new ArrayList<>();
+        for(int i = 0;i<=mPrefs.getInt("nbrCities",0);++i){
+            mCityNames.add(mPrefs.getString("ville"+i+"",""));
+        }
 
-        new Handler().postDelayed(() -> {
+        mAdd.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                AddDialog add = new AddDialog();
+                add.show(getSupportFragmentManager(), null);
+            }
+        });
 
-            Intent intent = new Intent(AllCitiesActivity.this, MainActivity.class);
-            intent.putExtra(LATITUDE_COORDINATES, 39.0);
-            intent.putExtra(LONGITUDE_COORDINATES, 125.0);
-            setResult(RESULT_OK, intent);
-            finish();
-
-        }, 800);
-
+        AllCitiesAdapter mAllCitiesAdapter = new AllCitiesAdapter(this, mCityNames, mPrefs);
+        mRecyclerView.setAdapter(mAllCitiesAdapter);
 
     }
 
@@ -70,7 +77,7 @@ public class AllCitiesActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch(id) {
+        switch (id) {
             case R.id.navigation_all_cities:
                 startActivity(new Intent(this, AllCitiesActivity.class));
                 finish();
@@ -82,5 +89,8 @@ public class AllCitiesActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    public int getSize(){
+        return mCityNames.size();
     }
 }

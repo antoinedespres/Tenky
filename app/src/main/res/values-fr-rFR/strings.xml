@@ -15,4 +15,7 @@
     <string name="title_feels_like">Ressenti</string>
     <string name="title_humidity">Humidité</string>
     <string name="title_temp">Température</string>
+    <string name="add">Ajouter</string>
+    <string name="cancel">Annuler</string>
+    <string name="noname">Aucun nom entré</string>
 </resources>
