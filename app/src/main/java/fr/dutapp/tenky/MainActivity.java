@@ -1,7 +1,7 @@
 package fr.dutapp.tenky;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,13 +28,11 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ import static fr.dutapp.tenky.AllCitiesActivity.ALL_CITIES_ACTIVITY_REQUEST_CODE
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
-    public static final int  MAIN_ACTIVITY_REQUEST_CODE = 1;
+    public static final int MAIN_ACTIVITY_REQUEST_CODE = 1;
 
     private static final long MIN_TIME_BW_UPDATES = 300000;
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5000;
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private LocationManager mLocationManager;
     private double mLat, mLon;
     private Location mLocation;
-    private boolean mUseCelsius;
+    private String mUnits;
     private ImageView mcurrWea;
     private ImageView mWeaTom;
     private ImageView mWeaJ2;
@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private ImageView mWeaJ6;
     private ImageView mWeaJ7;
     private Map iconMap;
-    private SharedPreferences prefs;
+    private SharedPreferences mPrefs;
 
 
     @Override
@@ -160,11 +160,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         iconMap.put("ic_50d", R.drawable.ic_50d);
         iconMap.put("ic_50n", R.drawable.ic_50n);
 
-        this.prefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        this.mUseCelsius = prefs.getBoolean("temperatureUnit", true);
-        SharedPreferences.Editor edit = this.prefs.edit();
-        edit.putInt("nbrCities", 0);
-
+        this.mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        mUnits = mPrefs.getBoolean("temperatureUnit", true) ? "metric" : "imperial";
 
         getCoordinates();
         displayWeather(mLat, mLon);
@@ -187,16 +184,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                     String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
                     ActivityCompat.requestPermissions(this, permissions, 1);
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    //return;
                 }
-                if (isNetworkEnabled) {
+                /*if (isNetworkEnabled) {
 
-                    mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, (LocationListener) this);
+                    mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                     Log.d("Network", "Network");
                     if (mLocationManager != null) {
                         mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -205,11 +196,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                             mLon = mLocation.getLongitude();
                         }
                     }
-                }
+                }*/
+
                 //get the location by gps
                 if (isGPSEnabled) {
                     if (mLocation == null) {
-                        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, (LocationListener) this);
+                        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                         Log.d("GPS Enabled", "GPS Enabled");
                         if (mLocationManager != null) {
 
@@ -234,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onRestart() {
         super.onRestart();
-        mUseCelsius = prefs.getBoolean("temperatureUnit", true);
+        mUnits = mPrefs.getBoolean("temperatureUnit", true) ? "metric" : "imperial";
         displayWeather(mLat, mLon);
     }
 
@@ -273,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (ALL_CITIES_ACTIVITY_REQUEST_CODE == requestCode && RESULT_OK == resultCode) {
+        if (RESULT_OK == resultCode) {
             Log.d("activityforresult", "%%%%%%%%%%%%");
             // Default location: Paris, France
             mLat = data.getDoubleExtra(AllCitiesActivity.LATITUDE_COORDINATES, 48.86);
@@ -285,10 +277,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     /**
      * Display weather data from a city name
+     *
      * @param cityName The name of the city
      */
     public void displayWeather(String cityName) {
-        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+apiKey;
+        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&units=" + mUnits + "&appid=" + apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
@@ -297,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 double lat = coord.getDouble("lat");
                 double lon = coord.getDouble("lon");
                 displayWeather(lat, lon);
-            } catch (JSONException e){
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }, error -> {
@@ -319,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      * @param lon Longitude coordinate
      */
     public void displayWeather(double lat, double lon) {
-        String fullURL = url + lat + "&lon=" + lon + "&appid=" + apiKey;
+        String fullURL = url + lat + "&lon=" + lon + "&units=" + mUnits + "&appid=" + apiKey;
 
         StringRequest str = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
@@ -331,9 +324,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                 SimpleDateFormat fora = new SimpleDateFormat("E");
 
-                mTemperature.setText(String.format("%.2g", convertTemp(current.getDouble("temp"))) + "°");
+                mTemperature.setText(Math.round(current.getDouble("temp")) + "°");
                 mHumidity.setText(current.getDouble("humidity") + " %");
-                mFeelsLike.setText(String.format("%.2g", convertTemp(current.getDouble("feels_like"))) + "°");
+                mFeelsLike.setText(Math.round(current.getDouble("feels_like")) + "°");
                 JSONArray w = current.getJSONArray("weather");
                 mDesc.setText(w.getJSONObject(0).getString("description"));
 
@@ -353,33 +346,30 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 JSONObject day6 = daily.getJSONObject(6);
                 JSONObject day7 = daily.getJSONObject(7);
 
-                Log.d("jsp", day2.toString());
-                Log.d("jsp", day3.toString());
 
+                mTomorrowtext.setText(Math.round(tomorrow.getJSONObject("temp").getDouble("day")) + "°");
+                mTomorrowMMtext.setText(Math.round(tomorrow.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(tomorrow.getJSONObject("temp").getDouble("min")) + "°");
 
-                mTomorrowtext.setText(String.format("%.2g", convertTemp(tomorrow.getJSONObject("temp").getDouble("day"))) + "°");
-                mTomorrowMMtext.setText(String.format("%.2g", convertTemp(tomorrow.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(tomorrow.getJSONObject("temp").getDouble("min"))) + "°");
+                mJ2text.setText(Math.round(day2.getJSONObject("temp").getDouble("day")) + "°");
+                mJ2MMtext.setText(Math.round(day2.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day2.getJSONObject("temp").getDouble("min")) + "°");
 
-                mJ2text.setText(String.format("%.2g", convertTemp(day2.getJSONObject("temp").getDouble("day"))) + "°");
-                mJ2MMtext.setText(String.format("%.2g", convertTemp(day2.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day2.getJSONObject("temp").getDouble("min"))) + "°");
+                mJ3text.setText(Math.round(day3.getJSONObject("temp").getDouble("day")) + "°");
+                mJ3MMtext.setText(Math.round(day3.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day3.getJSONObject("temp").getDouble("min")) + "°");
 
-                mJ3text.setText(String.format("%.2g", convertTemp(day3.getJSONObject("temp").getDouble("day"))) + "°");
-                mJ3MMtext.setText(String.format("%.2g", convertTemp(day3.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day3.getJSONObject("temp").getDouble("min"))) + "°");
+                mJ4text.setText(Math.round(day4.getJSONObject("temp").getDouble("day")) + "°");
+                mJ4MMtext.setText(Math.round(day4.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day4.getJSONObject("temp").getDouble("min")) + "°");
 
-                mJ4text.setText(String.format("%.2g", convertTemp(day4.getJSONObject("temp").getDouble("day"))) + "°");
-                mJ4MMtext.setText(String.format("%.2g", convertTemp(day4.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day4.getJSONObject("temp").getDouble("min"))) + "°");
+                mJ5text.setText(Math.round(day5.getJSONObject("temp").getDouble("day")) + "°");
+                mJ5MMtext.setText(Math.round(day5.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day5.getJSONObject("temp").getDouble("min")) + "°");
 
-                mJ5text.setText(String.format("%.2g", convertTemp(day5.getJSONObject("temp").getDouble("day"))) + "°");
-                mJ5MMtext.setText(String.format("%.2g", convertTemp(day5.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day5.getJSONObject("temp").getDouble("min"))) + "°");
+                mJ6text.setText(Math.round(day6.getJSONObject("temp").getDouble("day")) + "°");
+                mJ6MMtext.setText(Math.round(day6.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day6.getJSONObject("temp").getDouble("min")) + "°");
 
-                mJ6text.setText(String.format("%.2g", convertTemp(day6.getJSONObject("temp").getDouble("day"))) + "°");
-                mJ6MMtext.setText(String.format("%.2g", convertTemp(day6.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day6.getJSONObject("temp").getDouble("min"))) + "°");
-
-                mJ7text.setText(String.format("%.2g", convertTemp(day7.getJSONObject("temp").getDouble("day"))) + "°");
-                mJ7MMtext.setText(String.format("%.2g", convertTemp(day7.getJSONObject("temp").getDouble("max"))) + "°/" + String.format("%.2g", convertTemp(day7.getJSONObject("temp").getDouble("min"))) + "°");
+                mJ7text.setText(Math.round(day7.getJSONObject("temp").getDouble("day")) + "°");
+                mJ7MMtext.setText(Math.round(day7.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day7.getJSONObject("temp").getDouble("min")) + "°");
 
                 // wind speed in kph
-                mWindSpeed.setText(String.format("%.2g", current.getDouble("wind_speed") * 3.6 ) + " km/h");
+                mWindSpeed.setText(Math.round(current.getDouble("wind_speed")) + " km/h");
 
                 mcurrWea.setImageResource((int) this.iconMap.get("ic_" + w.getJSONObject(0).getString("icon")));
 
@@ -413,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         requestQueue.add(str);
 
         // second API call to get the name of the city
-        String Url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey;
+        String Url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + mUnits + "&appid=" + apiKey;
         StringRequest str2 = new StringRequest(Request.Method.GET, Url, response -> {
             try {
 
@@ -443,8 +433,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return context.getPackageName() + "_preferences";
     }
 
-    public double convertTemp(double temp) {
-        if (this.mUseCelsius)
+    /*public double convertTemp(double temp) {
+        if (this.mUnits)
             return temp - 273.15;
         return (temp - 273.15) * 9 / 5 + 32;
     }
@@ -453,5 +443,5 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if(useCelsius)
             return temp - 273.15;
         return (temp - 273.15) * 9 / 5 + 32;
-    }
+    }*/
 }

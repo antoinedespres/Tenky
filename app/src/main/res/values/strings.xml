@@ -28,5 +28,6 @@
     <string name="noname">No Name Entered</string>
     <string name="ok" translatable="false">OK</string>
     <string name="title_city_name">City name</string>
+    <string name="title_button_clear">Clear</string>
     <!-- TODO: Remove or change this placeholder text -->
 </resources>

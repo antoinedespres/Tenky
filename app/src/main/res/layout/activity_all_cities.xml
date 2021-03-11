@@ -19,27 +19,38 @@
             android:layout_width="match_parent"
             android:layout_height="200dp">
 
-            <ImageButton
-                android:id="@+id/imgButtonAdd"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="360dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_add_city" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view_all_cities"
-                android:layout_width="0dp"
-                android:layout_height="422dp"
+                android:layout_width="414dp"
+                android:layout_height="521dp"
                 android:layout_marginTop="64dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="0.666"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="1.0" />
+                app:layout_constraintVertical_bias="1.0">
+
+            </androidx.recyclerview.widget.RecyclerView>
+
+            <Button
+                android:id="@+id/button_reset_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:text="@string/title_button_clear"
+                app:layout_constraintBaseline_toBaselineOf="@+id/buttonAdd"
+                app:layout_constraintEnd_toStartOf="@+id/buttonAdd" />
+
+            <Button
+                android:id="@+id/buttonAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/add"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

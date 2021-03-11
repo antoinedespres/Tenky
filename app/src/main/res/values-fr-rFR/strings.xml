@@ -19,4 +19,5 @@
     <string name="cancel">Annuler</string>
     <string name="noname">Aucun nom saisi</string>
     <string name="title_city_name">Nom de ville</string>
+    <string name="title_button_clear">Vider</string>
 </resources>

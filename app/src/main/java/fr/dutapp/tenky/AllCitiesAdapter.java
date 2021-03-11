@@ -28,6 +28,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static fr.dutapp.tenky.AllCitiesActivity.LATITUDE_COORDINATES;
+import static fr.dutapp.tenky.AllCitiesActivity.LONGITUDE_COORDINATES;
+
 public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllCitiesViewHolder>{
 
     private Context mContext;
@@ -70,21 +73,17 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
 
     @Override
     public void onBindViewHolder(@NonNull AllCitiesViewHolder holder, int position) {
-        // TODO
         String cityName = mCityNames.get(position);
         holder.mTextViewCityName.setText(cityName);
+        String units = mPrefs.getBoolean("temperatureUnit", true) ? "metric" : "imperial";
 
-
-        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+ MainActivity.apiKey;
+        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+ "&units=" + units + "&appid="+ MainActivity.apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
                 JSONObject resp = new JSONObject(response);
                 JSONObject coords = resp.getJSONObject("coord");
-                if(mPrefs.getBoolean("temperatureUnit", true))
-                    holder.mTextViewTempCity.setText(String.format("%.2g",resp.getJSONObject("main").getDouble("temp")-273.15));
-                else
-                    holder.mTextViewTempCity.setText(String.format("%.2g",(resp.getJSONObject("main").getDouble("temp")-273.15)* 9 / 5 + 32));
+                holder.mTextViewTempCity.setText(Math.round(resp.getJSONObject("main").getDouble("temp")) + "°");
 
                 holder.mImageViewWeaCity.setImageResource((int) this.iconMap.get("ic_" + resp.getJSONArray("weather").getJSONObject(0).getString("icon")));
                 holder.mLayout.setOnClickListener(new View.OnClickListener(){
@@ -92,8 +91,8 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
                     public void onClick(View view){
                         Intent intent = new Intent(mContext, MainActivity.class);
                         try {
-                            intent.putExtra("lat",coords.getInt("lat"));
-                            intent.putExtra("lon", coords.getInt("lon"));
+                            intent.putExtra(LATITUDE_COORDINATES,coords.getDouble("lat"));
+                            intent.putExtra(LONGITUDE_COORDINATES, coords.getDouble("lon"));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -111,7 +110,8 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
                 e.printStackTrace();
             }
         });
-
+        RequestQueue requestQueue = Volley.newRequestQueue(mContext);
+        requestQueue.add(stringRequest);
         // holder.mTextViewCityName.setText(mCityNames.get(i));
     }
 
