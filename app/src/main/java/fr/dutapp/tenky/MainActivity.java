@@ -448,4 +448,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return temp - 273.15;
         return (temp - 273.15) * 9 / 5 + 32;
     }
+
+    public double convertTemp(boolean useCelsius, double temp){
+        if(useCelsius)
+            return temp - 273.15;
+        return (temp - 273.15) * 9 / 5 + 32;
+    }
 }

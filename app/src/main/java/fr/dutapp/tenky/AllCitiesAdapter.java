@@ -74,6 +74,7 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
         String cityName = mCityNames.get(position);
         holder.mTextViewCityName.setText(cityName);
 
+
         String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+"&appid="+ MainActivity.apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
@@ -110,8 +111,6 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
                 e.printStackTrace();
             }
         });
-
-
 
         // holder.mTextViewCityName.setText(mCityNames.get(i));
     }

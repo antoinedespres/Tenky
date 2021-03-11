@@ -25,16 +25,17 @@
                 android:id="@+id/textViewTempAllCities"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="260dp"
                 android:layout_marginTop="24dp"
-                android:text="TextView"
-                app:layout_constraintStart_toEndOf="@+id/imageViewWeaAllCities"
+                android:layout_marginEnd="52dp"
+                android:text="@string/title_no_data"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/imageViewWeaAllCities"
                 android:layout_width="77dp"
                 android:layout_height="72dp"
+                android:layout_marginStart="16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_02d" />
@@ -43,7 +44,7 @@
                 android:id="@+id/textViewAllCitiesCityName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="60dp"
+                android:layout_marginStart="20dp"
                 android:layout_marginTop="20dp"
                 android:text="city name"
                 android:textSize="24sp"

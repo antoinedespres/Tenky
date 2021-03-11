@@ -17,5 +17,6 @@
     <string name="title_temp">Température</string>
     <string name="add">Ajouter</string>
     <string name="cancel">Annuler</string>
-    <string name="noname">Aucun nom entré</string>
+    <string name="noname">Aucun nom saisi</string>
+    <string name="title_city_name">Nom de ville</string>
 </resources>
