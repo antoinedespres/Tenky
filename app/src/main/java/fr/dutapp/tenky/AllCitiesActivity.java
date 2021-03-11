@@ -5,11 +5,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,11 +17,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import static fr.dutapp.tenky.MainActivity.MAIN_ACTIVITY_REQUEST_CODE;
 import static fr.dutapp.tenky.MainActivity.getDefaultSharedPreferencesName;
 
 public class AllCitiesActivity extends AppCompatActivity {
@@ -35,7 +29,8 @@ public class AllCitiesActivity extends AppCompatActivity {
 
     private SharedPreferences mPrefs;
     ArrayList<String> mCityNames;
-    private ImageButton mAdd;
+    private Button mAdd;
+    private Button mClear;
 
     private RecyclerView mRecyclerView;
 
@@ -46,10 +41,11 @@ public class AllCitiesActivity extends AppCompatActivity {
 
         mRecyclerView = findViewById(R.id.recycler_view_all_cities);
         mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        mAdd = findViewById(R.id.imgButtonAdd);
+        mAdd = findViewById(R.id.buttonAdd);
+        mClear = findViewById(R.id.button_reset_list);
 
         mCityNames = new ArrayList<>();
-        for (int i = 0; i <= mPrefs.getInt("nbrCities", 0); ++i) {
+        for (int i = 0; i < mPrefs.getInt("nbrCities", 0); ++i) {
             mCityNames.add(mPrefs.getString("ville" + i + "", ""));
         }
 
@@ -59,26 +55,24 @@ public class AllCitiesActivity extends AppCompatActivity {
                 dialog.setContentView(R.layout.custom_dialog);
                 dialog.setTitle("Title");
 
-                Button button = (Button) dialog.findViewById(R.id.dialog_ok);
-                Button button_cancel = (Button) dialog.findViewById(R.id.dialog_cancel);
+                Button button = dialog.findViewById(R.id.dialog_ok);
+                Button button_cancel = dialog.findViewById(R.id.dialog_cancel);
 
-                button.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
+                button.setOnClickListener(v12 -> {
 
-                        EditText edit = (EditText) dialog.findViewById(R.id.cityname_text);
-                        String cityName = edit.getText().toString();
+                    EditText edit = dialog.findViewById(R.id.cityname_text);
+                    String cityName = edit.getText().toString();
 
-                        SharedPreferences.Editor editor = mPrefs.edit();
-                        editor.putString("ville" + mPrefs.getInt("nbrCities", 0) + "", cityName);
-                        editor.putInt("nbrCities", mPrefs.getInt("nbrCities", 0) + 1);
-                        editor.apply();
+                    SharedPreferences.Editor editor = mPrefs.edit();
+                    editor.putString("ville" + mPrefs.getInt("nbrCities", 0) + "", cityName);
+                    editor.putInt("nbrCities", mPrefs.getInt("nbrCities", 0) + 1);
+                    editor.apply();
 
-                        dialog.dismiss();
+                    dialog.dismiss();
 
-                        // Reload the Activity
-                        finish();
-                        startActivity(getIntent());
-                    }
+                    // Reload the Activity
+                    finish();
+                    startActivity(getIntent());
                 });
 
                 button_cancel.setOnClickListener(v1 -> dialog.dismiss());
