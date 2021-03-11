@@ -1,16 +1,21 @@
 package fr.dutapp.tenky;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 
 import java.util.ArrayList;
@@ -44,20 +49,49 @@ public class AllCitiesActivity extends AppCompatActivity {
         mAdd = findViewById(R.id.imgButtonAdd);
 
         mCityNames = new ArrayList<>();
-        for(int i = 0;i<=mPrefs.getInt("nbrCities",0);++i){
-            mCityNames.add(mPrefs.getString("ville"+i+"",""));
+        for (int i = 0; i <= mPrefs.getInt("nbrCities", 0); ++i) {
+            mCityNames.add(mPrefs.getString("ville" + i + "", ""));
         }
 
         mAdd.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                AddDialog add = new AddDialog();
-                add.show(getSupportFragmentManager(), null);
+                final Dialog dialog = new Dialog(AllCitiesActivity.this);
+                dialog.setContentView(R.layout.custom_dialog);
+                dialog.setTitle("Title");
+
+                Button button = (Button) dialog.findViewById(R.id.dialog_ok);
+                Button button_cancel = (Button) dialog.findViewById(R.id.dialog_cancel);
+
+                button.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+
+                        EditText edit = (EditText) dialog.findViewById(R.id.cityname_text);
+                        String cityName = edit.getText().toString();
+
+                        SharedPreferences.Editor editor = mPrefs.edit();
+                        editor.putString("ville" + mPrefs.getInt("nbrCities", 0) + "", cityName);
+                        editor.putInt("nbrCities", mPrefs.getInt("nbrCities", 0) + 1);
+                        editor.apply();
+
+                        dialog.dismiss();
+
+                        // Reload the Activity
+                        finish();
+                        startActivity(getIntent());
+                    }
+                });
+
+                button_cancel.setOnClickListener(v1 -> dialog.dismiss());
+
+                dialog.show();
             }
         });
 
+        Log.d("oui", mPrefs.getAll().toString());
+
         AllCitiesAdapter mAllCitiesAdapter = new AllCitiesAdapter(this, mCityNames, mPrefs);
         mRecyclerView.setAdapter(mAllCitiesAdapter);
-
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
@@ -90,7 +124,8 @@ public class AllCitiesActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-    public int getSize(){
+
+    public int getSize() {
         return mCityNames.size();
     }
 }

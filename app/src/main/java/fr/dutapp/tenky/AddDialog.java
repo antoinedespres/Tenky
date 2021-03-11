@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.EditText;
 
@@ -19,7 +20,6 @@ import java.util.Map;
 
 public class AddDialog extends DialogFragment {
     private int mSize;
-
 
     @NonNull
     @Override
@@ -35,15 +35,17 @@ public class AddDialog extends DialogFragment {
                 .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        Editable e = ((EditText) getActivity().findViewById(R.id.CityName)).getText();
-                        if(e == null){
+                        String name = ((EditText) getActivity().findViewById(R.id.CityName)).getText().toString();
+                        if(name == null){
                             new NoNameAlertDialog().show(getParentFragmentManager(), null);
                         }
-                        String name = e.toString();
+
                         SharedPreferences s = getActivity().getSharedPreferences(getActivity().getPackageName() + "_preferences", Context.MODE_PRIVATE);
                         SharedPreferences.Editor edit = s.edit();
-                        edit.putString("ville"+s.getInt("nbrCities", 0)+"", "name");
+                        edit.putString("ville"+s.getInt("nbrCities", 0)+"", name);
                         edit.putInt("nbrCities", s.getInt("nbrCities",0)+1);
+                        Log.d("alertdialog", s.getAll().toString());
+                        edit.apply();
                         Intent intent = new Intent(getActivity(), AllCitiesActivity.class);
                         startActivity(intent);
                     }

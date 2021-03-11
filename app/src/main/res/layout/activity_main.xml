@@ -42,68 +42,68 @@
                 app:layout_constraintTop_toBottomOf="@+id/currentWeather">
 
                 <ImageView
+                    android:id="@+id/imageViewJ7"
+                    android:layout_width="38dp"
+                    android:layout_height="34dp"
+                    android:layout_marginTop="256dp"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
                     android:id="@+id/imageViewTom"
                     android:layout_width="39dp"
                     android:layout_height="33dp"
-                    android:layout_marginStart="320dp"
                     android:layout_marginTop="12dp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/imageViewJ2"
                     android:layout_width="38dp"
                     android:layout_height="35dp"
-                    android:layout_marginStart="320dp"
                     android:layout_marginTop="48dp"
+                    android:layout_marginEnd="32dp"
                     android:contentDescription="TODO"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/imageViewJ3"
                     android:layout_width="38dp"
                     android:layout_height="34dp"
-                    android:layout_marginStart="320dp"
                     android:layout_marginTop="92dp"
+                    android:layout_marginEnd="32dp"
                     android:contentDescription="TODO"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/imageViewJ4"
                     android:layout_width="38dp"
                     android:layout_height="35dp"
-                    android:layout_marginStart="320dp"
                     android:layout_marginTop="132dp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/imageViewJ6"
                     android:layout_width="38dp"
                     android:layout_height="34dp"
-                    android:layout_marginStart="320dp"
                     android:layout_marginTop="216dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/imageViewJ7"
-                    android:layout_width="38dp"
-                    android:layout_height="34dp"
-                    android:layout_marginStart="320dp"
-                    android:layout_marginTop="256dp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/imageViewJ5"
                     android:layout_width="38dp"
                     android:layout_height="36dp"
-                    android:layout_marginStart="320dp"
                     android:layout_marginTop="172dp"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginEnd="32dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
@@ -321,8 +321,8 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/more_info"
-                android:layout_width="0dp"
-                android:layout_height="199dp"
+                android:layout_width="416dp"
+                android:layout_height="208dp"
                 android:layout_marginTop="20dp"
                 android:background="#60ACACAC"
                 app:layout_constraintEnd_toEndOf="parent"
