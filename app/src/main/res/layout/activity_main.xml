@@ -453,6 +453,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
+                <TextView
+                    android:id="@+id/textViewFeelsLike"
+                    android:layout_width="71dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/title_no_data"
+                    app:layout_constraintStart_toEndOf="@+id/textView7"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewDesc" />
+
+                <TextView
+                    android:id="@+id/textView7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:text="@string/title_feels_like"
+                    app:layout_constraintStart_toStartOf="@+id/textViewDesc"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewDesc" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/main_activity_recycler_view"
                     android:layout_width="410dp"
@@ -475,8 +494,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:layout_marginTop="96dp"
-                    android:text="cityname"
+                    android:layout_marginTop="100dp"
+                    android:text="@string/title_no_data"
                     android:textSize="18sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -490,36 +509,6 @@
                     android:text="@string/title_no_data"
                     android:textSize="30sp"
                     app:layout_constraintStart_toEndOf="@+id/imageCurrentWea"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/constraintLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="86dp"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:layout_editor_absoluteX="-16dp">
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <TextView
-                    android:id="@+id/textViewFeelsLike"
-                    android:layout_width="71dp"
-                    android:layout_height="18dp"
-                    android:layout_marginStart="208dp"
-                    android:layout_marginTop="68dp"
-                    android:text="@string/title_no_data"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/textView7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="140dp"
-                    android:layout_marginTop="68dp"
-                    android:text="@string/title_feels_like"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
