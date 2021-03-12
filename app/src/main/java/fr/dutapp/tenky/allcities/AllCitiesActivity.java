@@ -1,4 +1,4 @@
-package fr.dutapp.tenky;
+package fr.dutapp.tenky.allcities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,9 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 
 import java.util.ArrayList;
+
+import fr.dutapp.tenky.R;
+import fr.dutapp.tenky.settings.SettingsActivity;
 
 import static fr.dutapp.tenky.MainActivity.getDefaultSharedPreferencesName;
 
@@ -49,53 +51,46 @@ public class AllCitiesActivity extends AppCompatActivity {
             mCityNames.add(mPrefs.getString("ville" + i + "", ""));
         }
 
-        mAdd.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                final Dialog dialog = new Dialog(AllCitiesActivity.this);
-                dialog.setContentView(R.layout.custom_dialog);
-                dialog.setTitle("Title");
+        mAdd.setOnClickListener(v -> {
+            final Dialog dialog = new Dialog(AllCitiesActivity.this);
+            dialog.setContentView(R.layout.custom_dialog);
+            dialog.setTitle("Title");
 
-                Button button = dialog.findViewById(R.id.dialog_ok);
-                Button button_cancel = dialog.findViewById(R.id.dialog_cancel);
+            Button button = dialog.findViewById(R.id.dialog_ok);
+            Button button_cancel = dialog.findViewById(R.id.dialog_cancel);
 
-                button.setOnClickListener(v12 -> {
+            button.setOnClickListener(v12 -> {
 
-                    EditText edit = dialog.findViewById(R.id.cityname_text);
-                    String cityName = edit.getText().toString();
+                EditText edit = dialog.findViewById(R.id.cityname_text);
+                String cityName = edit.getText().toString();
+                SharedPreferences.Editor editor = mPrefs.edit();
+                editor.putString("ville" + mPrefs.getInt("nbrCities", 0) + "", cityName);
+                editor.putInt("nbrCities", mPrefs.getInt("nbrCities", 0) + 1);
+                editor.apply();
 
-                    SharedPreferences.Editor editor = mPrefs.edit();
-                    editor.putString("ville" + mPrefs.getInt("nbrCities", 0) + "", cityName);
-                    editor.putInt("nbrCities", mPrefs.getInt("nbrCities", 0) + 1);
-                    editor.apply();
-
-                    dialog.dismiss();
-                    // Reload the Activity
-                    finish();
-                    startActivity(getIntent());
-                });
-
-                button_cancel.setOnClickListener(v1 -> dialog.dismiss());
-
-                dialog.show();
-            }
-        });
-
-        mClear.setOnClickListener(new View.OnClickListener(){
-            public void onClick(View v){
-                SharedPreferences.Editor edit = mPrefs.edit();
-                for (int i = 0; i < mPrefs.getInt("nbrCities", 0); ++i) {
-                    edit.remove("ville" + i + "");
-                    edit.apply();
-                }
-
-                edit.putInt("nbrCities", 0);
-                edit.apply();
+                dialog.dismiss();
+                // Reload the Activity
                 finish();
                 startActivity(getIntent());
-            }
+            });
+
+            button_cancel.setOnClickListener(v1 -> dialog.dismiss());
+
+            dialog.show();
         });
 
-        Log.d("oui", mPrefs.getAll().toString());
+        mClear.setOnClickListener(v -> {
+            SharedPreferences.Editor edit = mPrefs.edit();
+            for (int i = 0; i < mPrefs.getInt("nbrCities", 0); ++i) {
+                edit.remove("ville" + i + "");
+                edit.apply();
+            }
+
+            edit.putInt("nbrCities", 0);
+            edit.apply();
+            finish();
+            startActivity(getIntent());
+        });
 
         AllCitiesAdapter mAllCitiesAdapter = new AllCitiesAdapter(this, mCityNames, mPrefs);
         mRecyclerView.setAdapter(mAllCitiesAdapter);
@@ -129,11 +124,6 @@ public class AllCitiesActivity extends AppCompatActivity {
                 finish();
                 break;
         }
-
         return super.onOptionsItemSelected(item);
-    }
-
-    public int getSize() {
-        return mCityNames.size();
     }
 }

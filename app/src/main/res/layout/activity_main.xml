@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="308dp"
                 android:layout_marginTop="8dp"
-                android:background="#60ACACAC"
+                android:background="#99ACACAC"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -324,7 +324,7 @@
                 android:layout_width="410dp"
                 android:layout_height="228dp"
                 android:layout_marginTop="20dp"
-                android:background="#60ACACAC"
+                android:background="#99ACACAC"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -449,7 +449,7 @@
                 android:id="@+id/currentWeather"
                 android:layout_width="412dp"
                 android:layout_height="226dp"
-                android:background="#60ACACAC"
+                android:background="#99ACACAC"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
