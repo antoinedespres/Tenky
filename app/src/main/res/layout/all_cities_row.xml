@@ -22,7 +22,7 @@
             >
 
             <TextView
-                android:id="@+id/textViewTempAllCities"
+                android:id="@+id/textViewTempHourly"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -32,7 +32,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
-                android:id="@+id/imageViewWeaAllCities"
+                android:id="@+id/imageViewWeaHourly"
                 android:layout_width="77dp"
                 android:layout_height="72dp"
                 android:layout_marginStart="24dp"
@@ -41,14 +41,14 @@
                 app:srcCompat="@drawable/ic_02d" />
 
             <TextView
-                android:id="@+id/textViewAllCitiesCityName"
+                android:id="@+id/textViewHour"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="20dp"
                 android:text="city name"
                 android:textSize="24sp"
-                app:layout_constraintStart_toEndOf="@+id/imageViewWeaAllCities"
+                app:layout_constraintStart_toEndOf="@+id/imageViewWeaHourly"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>

@@ -26,7 +26,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static fr.dutapp.tenky.AllCitiesActivity.LATITUDE_COORDINATES;
 import static fr.dutapp.tenky.AllCitiesActivity.LONGITUDE_COORDINATES;
@@ -129,9 +128,9 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
 
         public AllCitiesViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTextViewCityName =itemView.findViewById(R.id.textViewAllCitiesCityName);
-            mImageViewWeaCity = itemView.findViewById(R.id.imageViewWeaAllCities);
-            mTextViewTempCity = itemView.findViewById(R.id.textViewTempAllCities);
+            mTextViewCityName =itemView.findViewById(R.id.textViewHour);
+            mImageViewWeaCity = itemView.findViewById(R.id.imageViewWeaHourly);
+            mTextViewTempCity = itemView.findViewById(R.id.textViewTempHourly);
             mLayout = itemView.findViewById(R.id.row_Layout);
         }
     }

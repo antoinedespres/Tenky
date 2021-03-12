@@ -23,6 +23,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -95,14 +97,17 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private ImageView mWeaJ5;
     private ImageView mWeaJ6;
     private ImageView mWeaJ7;
+    private ImageView mBG;
     private Map iconMap;
+    private Map imgMap;
     private SharedPreferences mPrefs;
-
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mBG = findViewById(R.id.imageViewBG);
         mTemperature = findViewById(R.id.TemperatureValue);
         mCityName = findViewById(R.id.CityValue);
         mSunrise = findViewById(R.id.textViewSunriseValue);
@@ -141,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mJ5 = findViewById(R.id.textViewJ5);
         mJ6 = findViewById(R.id.textViewJ6);
         mJ7 = findViewById(R.id.textViewJ7);
+        mRecyclerView = findViewById(R.id.main_activity_recycler_view);
 
         this.iconMap = new HashMap<String, Drawable>();
         iconMap.put("ic_01d", R.drawable.ic_01d);
@@ -162,6 +168,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         iconMap.put("ic_50d", R.drawable.ic_50d);
         iconMap.put("ic_50n", R.drawable.ic_50n);
 
+        this.imgMap = new HashMap<String, Drawable>();
+        imgMap.put("img_200", R.drawable.img_200);
+        imgMap.put("img_300", R.drawable.img_300);
+        imgMap.put("img_500", R.drawable.img_500);
+        imgMap.put("img_600", R.drawable.img_600);
+        imgMap.put("img_700", R.drawable.img_700);
+        imgMap.put("img_800", R.drawable.img_800);
+        imgMap.put("img_80x", R.drawable.img_80x);
+
         if(Locale.getDefault().getLanguage() == "fr") {
             mLocale = "fr";
         } else {
@@ -172,6 +187,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         getCoordinates();
         displayWeather(mLat, mLon);
+
+        MainActivityAdapter mActivity = new MainActivityAdapter(this, mPrefs, mLat, mLon);
+        LinearLayoutManager l = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mRecyclerView.setAdapter(mActivity);
+        mRecyclerView.setLayoutManager(l);
     }
 
     public void getCoordinates() {
@@ -282,6 +302,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             mLon = data.getDoubleExtra(AllCitiesActivity.LONGITUDE_COORDINATES, 2.34);
             displayWeather(mLat, mLon);
         }
+        else{
+            getCoordinates();
+            displayWeather(mLat, mLon);
+        }
 
     }
 
@@ -330,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 JSONObject current = resp.getJSONObject("current");
                 JSONArray hourly = resp.getJSONArray("hourly");
                 JSONArray daily = resp.getJSONArray("daily");
-                TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+                TimeZone.setDefault(TimeZone.getTimeZone(resp.getString("timezone")));
                 SimpleDateFormat format = new SimpleDateFormat("HH:mm");
                 SimpleDateFormat fora = new SimpleDateFormat("E");
 
@@ -340,10 +364,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 JSONArray w = current.getJSONArray("weather");
                 mDesc.setText(w.getJSONObject(0).getString("description"));
 
-                int timezone = resp.getInt("timezone_offset");
+                if(w.getJSONObject(0).getInt("id") == 800){
+                    mBG.setImageResource((int) this.imgMap.get("img_800"));
+                }else if(w.getJSONObject(0).getInt("id") > 800){
+                    mBG.setImageResource((int) this.imgMap.get("img_80x"));
+                }
 
-                Date sunrise = new Date((current.getLong("sunrise") + timezone) * 1000);
-                Date sunset = new Date((current.getLong("sunset") + timezone) * 1000);
+                else {
+                    int code = (int) (w.getJSONObject(0).getInt("id")/100) * 100;
+
+                    Log.d("image", code + "");
+                    mBG.setImageResource((int) this.imgMap.get("img_" + code));
+
+                }
+                //mBG.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                //int timezone = resp.getInt("timezone_offset");
+
+                Date sunrise = new Date((current.getLong("sunrise")) * 1000);
+                Date sunset = new Date((current.getLong("sunset")) * 1000);
 
                 mSunrise.setText(format.format(sunrise));
                 mSunset.setText(format.format(sunset));
@@ -391,12 +429,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 mWeaJ6.setImageResource((int) this.iconMap.get("ic_" + day6.getJSONArray("weather").getJSONObject(0).getString("icon")));
                 mWeaJ7.setImageResource((int) this.iconMap.get("ic_" + day7.getJSONArray("weather").getJSONObject(0).getString("icon")));
 
-                mJ2.setText(fora.format(new Date((day2.getLong("dt") + timezone) * 1000)));
-                mJ3.setText(fora.format(new Date((day3.getLong("dt") + timezone) * 1000)));
-                mJ4.setText(fora.format(new Date((day4.getLong("dt") + timezone) * 1000)));
-                mJ5.setText(fora.format(new Date((day5.getLong("dt") + timezone) * 1000)));
-                mJ6.setText(fora.format(new Date((day6.getLong("dt") + timezone) * 1000)));
-                mJ7.setText(fora.format(new Date((day7.getLong("dt") + timezone) * 1000)));
+                mJ2.setText(fora.format(new Date((day2.getLong("dt")) * 1000)));
+                mJ3.setText(fora.format(new Date((day3.getLong("dt")) * 1000)));
+                mJ4.setText(fora.format(new Date((day4.getLong("dt") ) * 1000)));
+                mJ5.setText(fora.format(new Date((day5.getLong("dt")) * 1000)));
+                mJ6.setText(fora.format(new Date((day6.getLong("dt")) * 1000)));
+                mJ7.setText(fora.format(new Date((day7.getLong("dt")) * 1000)));
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -431,6 +469,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         });
 
         requestQueue.add(stringRequest2);
+
+
+
     }
 
     /**

@@ -69,7 +69,6 @@ public class AllCitiesActivity extends AppCompatActivity {
                     editor.apply();
 
                     dialog.dismiss();
-
                     // Reload the Activity
                     finish();
                     startActivity(getIntent());
@@ -78,6 +77,21 @@ public class AllCitiesActivity extends AppCompatActivity {
                 button_cancel.setOnClickListener(v1 -> dialog.dismiss());
 
                 dialog.show();
+            }
+        });
+
+        mClear.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                SharedPreferences.Editor edit = mPrefs.edit();
+                for (int i = 0; i < mPrefs.getInt("nbrCities", 0); ++i) {
+                    edit.remove("ville" + i + "");
+                    edit.apply();
+                }
+
+                edit.putInt("nbrCities", 0);
+                edit.apply();
+                finish();
+                startActivity(getIntent());
             }
         });
 

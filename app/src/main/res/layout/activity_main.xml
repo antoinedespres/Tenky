@@ -447,11 +447,19 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/currentWeather"
-                android:layout_width="match_parent"
-                android:layout_height="219dp"
+                android:layout_width="412dp"
+                android:layout_height="226dp"
                 android:background="#60ACACAC"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="-16dp">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/main_activity_recycler_view"
+                    android:layout_width="410dp"
+                    android:layout_height="71dp"
+                    android:layout_marginTop="156dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
                     android:id="@+id/imageCurrentWea"
@@ -484,18 +492,15 @@
                     app:layout_constraintStart_toEndOf="@+id/imageCurrentWea"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <HorizontalScrollView
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
-                    android:layout_marginBottom="8dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent">
+                    android:layout_height="86dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_editor_absoluteX="-16dp">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical" />
-                </HorizontalScrollView>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView
                     android:id="@+id/textViewFeelsLike"
