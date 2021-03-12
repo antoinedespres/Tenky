@@ -374,8 +374,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     mBG.setImageResource((int) this.imgMap.get("img_" + code));
 
                 }
-                //mBG.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                //int timezone = resp.getInt("timezone_offset");
+                mBG.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
 
                 Date sunrise = new Date((current.getLong("sunrise")) * 1000);
                 Date sunset = new Date((current.getLong("sunset")) * 1000);
