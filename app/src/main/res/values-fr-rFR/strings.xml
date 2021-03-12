@@ -20,4 +20,6 @@
     <string name="noname">Aucun nom saisi</string>
     <string name="title_city_name">Nom de ville</string>
     <string name="title_button_clear">Vider</string>
+    <string name="title_credits">Crédits</string>
+    <string name="title_credits_description">Pack d\'icônes de Those icons sur flaticon.com</string>
 </resources>

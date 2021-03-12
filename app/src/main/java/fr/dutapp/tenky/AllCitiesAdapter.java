@@ -75,7 +75,7 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
     public void onBindViewHolder(@NonNull AllCitiesViewHolder holder, int position) {
         String cityName = mCityNames.get(position);
         holder.mTextViewCityName.setText(cityName);
-        String units = mPrefs.getBoolean("temperatureUnit", true) ? "metric" : "imperial";
+        String units = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
 
         String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+ "&units=" + units + "&appid="+ MainActivity.apiKey;
 

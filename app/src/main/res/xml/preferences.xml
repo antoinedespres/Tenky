@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <SwitchPreferenceCompat
-        app:key="temperatureUnit"
+        app:key="unitChoice"
         app:iconSpaceReserved="false"
         app:title="@string/settings_temperature_unit"
         app:summary="@string/settings_temperature_unit_desc"/>
@@ -11,7 +11,7 @@
     <Preference
         app:key="feedback"
         app:iconSpaceReserved="false"
-        app:title="Send feedback"
-        app:summary="Report technical issues or suggest new features"/>
+        app:title="@string/title_credits"
+        app:summary="@string/title_credits_description"/>
 
 </PreferenceScreen>
