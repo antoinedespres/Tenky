@@ -20,28 +20,35 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static fr.dutapp.tenky.AllCitiesActivity.LATITUDE_COORDINATES;
 import static fr.dutapp.tenky.AllCitiesActivity.LONGITUDE_COORDINATES;
 
-public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllCitiesViewHolder>{
+public class MainActivityAdapter extends RecyclerView.Adapter<MainActivityAdapter.MainActivityViewHolder>{
 
     private Context mContext;
-    private ArrayList<String> mCityNames;
     private Map iconMap;
     private SharedPreferences mPrefs;
+    private Double lat;
+    private Double lon;
 
-    public AllCitiesAdapter (Context ctx, ArrayList<String> cityNames, SharedPreferences prefs) {
+
+
+    public MainActivityAdapter (Context ctx, SharedPreferences prefs, double lat, double lon){
         mContext = ctx;
-        mCityNames = cityNames;
         mPrefs = prefs;
-
+        this.lat = lat;
+        this.lon = lon;
         this.iconMap = new HashMap<String, Drawable>();
         iconMap.put("ic_01d", R.drawable.ic_01d);
         iconMap.put("ic_01n", R.drawable.ic_01n);
@@ -61,44 +68,42 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
         iconMap.put("ic_13n", R.drawable.ic_13n);
         iconMap.put("ic_50d", R.drawable.ic_50d);
         iconMap.put("ic_50n", R.drawable.ic_50n);
+
     }
+
     @NonNull
     @Override
-    public AllCitiesViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MainActivityViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        View view = inflater.inflate(R.layout.all_cities_row, parent, false);
-        return new AllCitiesViewHolder(view);
+        View view = inflater.inflate(R.layout.main_activity_row, parent, false);
+
+        return new MainActivityViewHolder((view));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull AllCitiesViewHolder holder, int position) {
-        String cityName = mCityNames.get(position);
-        holder.mTextViewCityName.setText(cityName);
+    public void onBindViewHolder(@NonNull MainActivityViewHolder holder, int position) {
+
         String units = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
 
-        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+ "&units=" + units + "&appid="+ MainActivity.apiKey;
+        String fullURL = "https://api.openweathermap.org/data/2.5/onecall?lat="+lat+ "&lon=" + lon +"&units=" +  units + "&appid="+ MainActivity.apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
                 JSONObject resp = new JSONObject(response);
-                JSONObject coords = resp.getJSONObject("coord");
-                holder.mTextViewTempCity.setText(Math.round(resp.getJSONObject("main").getDouble("temp")) + "°");
+                JSONArray hourly = resp.getJSONArray("hourly");
+                JSONObject houly = hourly.getJSONObject(position);
 
-                holder.mImageViewWeaCity.setImageResource((int) this.iconMap.get("ic_" + resp.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                holder.mLayout.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View view){
-                        Intent intent = new Intent(mContext, MainActivity.class);
-                        try {
-                            intent.putExtra(LATITUDE_COORDINATES,coords.getDouble("lat"));
-                            intent.putExtra(LONGITUDE_COORDINATES, coords.getDouble("lon"));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        ((Activity) mContext).setResult(Activity.RESULT_OK, intent);
-                        ((Activity) mContext).finish();
-                    }
-                });
+                TimeZone.setDefault(TimeZone.getTimeZone(resp.getString("timezone")));
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+                //int timezone = resp.getInt("timezone_offset");
+
+                Date hour = new Date((houly.getLong("dt")) * 1000);
+
+                holder.mImageViewWea.setImageResource((int) this.iconMap.get("ic_" + houly.getJSONArray("weather").getJSONObject(0).getString("icon") ));
+                holder.mTextViewHour.setText(format.format(hour));
+                holder.mTextViewTemp.setText(Math.round(houly.getDouble("temp")) + "°");
+
+
             } catch (JSONException e){
                 e.printStackTrace();
             }
@@ -111,28 +116,29 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
         });
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         requestQueue.add(stringRequest);
-        // holder.mTextViewCityName.setText(mCityNames.get(i));
+
+
     }
+
 
     @Override
     public int getItemCount() {
-        return mCityNames.size();
+        return 24;
     }
 
-    public class AllCitiesViewHolder extends RecyclerView.ViewHolder {
+    public class MainActivityViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView mTextViewCityName;
-        private ImageView mImageViewWeaCity;
-        private TextView mTextViewTempCity;
-        private ConstraintLayout mLayout;
+        private TextView mTextViewHour;
+        private ImageView mImageViewWea;
+        private TextView mTextViewTemp;
 
-        public AllCitiesViewHolder(@NonNull View itemView) {
+
+        public MainActivityViewHolder(@NonNull View itemView) {
             super(itemView);
-            mTextViewCityName =itemView.findViewById(R.id.textViewHour);
-            mImageViewWeaCity = itemView.findViewById(R.id.imageViewWeaHourly);
-            mTextViewTempCity = itemView.findViewById(R.id.textViewTempHourly);
-            mLayout = itemView.findViewById(R.id.row_Layout);
+            mTextViewHour =itemView.findViewById(R.id.textViewHour);
+            mImageViewWea = itemView.findViewById(R.id.imageViewWeaHourly);
+            mTextViewTemp = itemView.findViewById(R.id.textViewTempHourly);
+
         }
     }
-
 }

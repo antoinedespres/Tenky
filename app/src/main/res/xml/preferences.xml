@@ -6,7 +6,8 @@
         app:key="unitChoice"
         app:iconSpaceReserved="false"
         app:title="@string/settings_temperature_unit"
-        app:summary="@string/settings_temperature_unit_desc"/>
+        app:summary="@string/settings_temperature_unit_desc"
+        />
 
     <Preference
         app:key="feedback"
