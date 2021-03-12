@@ -76,7 +76,7 @@ public class MainActivityAdapter extends RecyclerView.Adapter<MainActivityAdapte
     @Override
     public void onBindViewHolder(@NonNull MainActivityViewHolder holder, int position) {
 
-        String units = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
+        String units = mPrefs.getBoolean("unitChoice", false) ? "imperial" : "metric";
 
         String fullURL = "https://api.openweathermap.org/data/2.5/onecall?lat="+lat+ "&lon=" + lon +"&units=" +  units + "&appid="+ MainActivity.apiKey;
 
