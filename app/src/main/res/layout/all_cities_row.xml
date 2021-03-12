@@ -35,7 +35,7 @@
                 android:id="@+id/imageViewWeaAllCities"
                 android:layout_width="77dp"
                 android:layout_height="72dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="24dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_02d" />

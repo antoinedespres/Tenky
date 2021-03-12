@@ -36,6 +36,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5000;
     public final static String apiKey = "6b9eb0c4a410dfaf06f6fa358eb6ffba";
     public final static String url = "https://api.openweathermap.org/data/2.5/onecall?lat=";
+    private String mLocale;
 
     private TextView mTemperature;
     private TextView mCityName;
@@ -160,8 +162,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         iconMap.put("ic_50d", R.drawable.ic_50d);
         iconMap.put("ic_50n", R.drawable.ic_50n);
 
+        if(Locale.getDefault().getLanguage() == "fr") {
+            mLocale = "fr";
+        } else {
+            mLocale = "en";
+        }
         this.mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        mUnits = mPrefs.getBoolean("temperatureUnit", true) ? "metric" : "imperial";
+        mUnits = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
 
         getCoordinates();
         displayWeather(mLat, mLon);
@@ -179,24 +186,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             if (!isGPSEnabled && !isNetworkEnabled) {
             } else {
+                Log.d("ui", "pas activ");
                 // First get location from Network Provider
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
                     String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
                     ActivityCompat.requestPermissions(this, permissions, 1);
                 }
-                /*if (isNetworkEnabled) {
+                if (isNetworkEnabled) {
 
                     mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d("Network", "Network");
+                    Log.d("Network", "Network enabled");
                     if (mLocationManager != null) {
                         mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         if (mLocation != null) {
+                            Log.d("location", "by network");
                             mLat = mLocation.getLatitude();
                             mLon = mLocation.getLongitude();
                         }
                     }
-                }*/
+                }
 
                 //get the location by gps
                 if (isGPSEnabled) {
@@ -207,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                             mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                             if (mLocation != null) {
+                                Log.d("location", "by gps");
                                 mLat = mLocation.getLatitude();
                                 mLon = mLocation.getLongitude();
                             }
@@ -226,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onRestart() {
         super.onRestart();
-        mUnits = mPrefs.getBoolean("temperatureUnit", true) ? "metric" : "imperial";
+        mUnits = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
         displayWeather(mLat, mLon);
     }
 
@@ -266,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         super.onActivityResult(requestCode, resultCode, data);
 
         if (RESULT_OK == resultCode) {
-            Log.d("activityforresult", "%%%%%%%%%%%%");
+            Log.d("onActivityResult", "Method called in MainActivity");
             // Default location: Paris, France
             mLat = data.getDoubleExtra(AllCitiesActivity.LATITUDE_COORDINATES, 48.86);
             mLon = data.getDoubleExtra(AllCitiesActivity.LONGITUDE_COORDINATES, 2.34);
@@ -281,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      * @param cityName The name of the city
      */
     public void displayWeather(String cityName) {
-        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&units=" + mUnits + "&appid=" + apiKey;
+        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
@@ -312,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      * @param lon Longitude coordinate
      */
     public void displayWeather(double lat, double lon) {
-        String fullURL = url + lat + "&lon=" + lon + "&units=" + mUnits + "&appid=" + apiKey;
+        String fullURL = url + lat + "&lon=" + lon + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
 
         StringRequest str = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
@@ -368,8 +378,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 mJ7text.setText(Math.round(day7.getJSONObject("temp").getDouble("day")) + "°");
                 mJ7MMtext.setText(Math.round(day7.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day7.getJSONObject("temp").getDouble("min")) + "°");
 
-                // wind speed in kph
-                mWindSpeed.setText(Math.round(current.getDouble("wind_speed")) + " km/h");
+                String windSpeedUnit = mUnits == "metric" ? " km/h" : " mph";
+                mWindSpeed.setText(Math.round(current.getDouble("wind_speed")) + windSpeedUnit);
 
                 mcurrWea.setImageResource((int) this.iconMap.get("ic_" + w.getJSONObject(0).getString("icon")));
 
@@ -403,8 +413,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         requestQueue.add(str);
 
         // second API call to get the name of the city
-        String Url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + mUnits + "&appid=" + apiKey;
-        StringRequest str2 = new StringRequest(Request.Method.GET, Url, response -> {
+        String Url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
+        StringRequest stringRequest2 = new StringRequest(Request.Method.GET, Url, response -> {
             try {
 
                 JSONObject object = new JSONObject(response);
@@ -420,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             }
         });
 
-        requestQueue.add(str2);
+        requestQueue.add(stringRequest2);
     }
 
     /**
@@ -432,16 +442,4 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public static final String getDefaultSharedPreferencesName(Context context) {
         return context.getPackageName() + "_preferences";
     }
-
-    /*public double convertTemp(double temp) {
-        if (this.mUnits)
-            return temp - 273.15;
-        return (temp - 273.15) * 9 / 5 + 32;
-    }
-
-    public double convertTemp(boolean useCelsius, double temp){
-        if(useCelsius)
-            return temp - 273.15;
-        return (temp - 273.15) * 9 / 5 + 32;
-    }*/
 }
