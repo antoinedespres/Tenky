@@ -1,20 +1,11 @@
-package fr.dutapp.tenky;
+package fr.dutapp.tenky.settings;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.SwitchPreferenceCompat;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import fr.dutapp.tenky.R;
 
 /**
  * A simple {@link Fragment} subclass.

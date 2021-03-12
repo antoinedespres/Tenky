@@ -1,4 +1,4 @@
-package fr.dutapp.tenky;
+package fr.dutapp.tenky.allcities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -27,8 +27,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static fr.dutapp.tenky.AllCitiesActivity.LATITUDE_COORDINATES;
-import static fr.dutapp.tenky.AllCitiesActivity.LONGITUDE_COORDINATES;
+import fr.dutapp.tenky.MainActivity;
+import fr.dutapp.tenky.R;
+
+import static fr.dutapp.tenky.allcities.AllCitiesActivity.LATITUDE_COORDINATES;
+import static fr.dutapp.tenky.allcities.AllCitiesActivity.LONGITUDE_COORDINATES;
 
 public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllCitiesViewHolder>{
 
@@ -74,7 +77,7 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
     public void onBindViewHolder(@NonNull AllCitiesViewHolder holder, int position) {
         String cityName = mCityNames.get(position);
         holder.mTextViewCityName.setText(cityName);
-        String units = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
+        String units = mPrefs.getBoolean("unitChoice", false) ? "imperial" : "metric";
 
         String fullURL = "https://api.openweathermap.org/data/2.5/weather?q="+cityName+ "&units=" + units + "&appid="+ MainActivity.apiKey;
 
@@ -85,19 +88,16 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
                 holder.mTextViewTempCity.setText(Math.round(resp.getJSONObject("main").getDouble("temp")) + "°");
 
                 holder.mImageViewWeaCity.setImageResource((int) this.iconMap.get("ic_" + resp.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                holder.mLayout.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View view){
-                        Intent intent = new Intent(mContext, MainActivity.class);
-                        try {
-                            intent.putExtra(LATITUDE_COORDINATES,coords.getDouble("lat"));
-                            intent.putExtra(LONGITUDE_COORDINATES, coords.getDouble("lon"));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        ((Activity) mContext).setResult(Activity.RESULT_OK, intent);
-                        ((Activity) mContext).finish();
+                holder.mLayout.setOnClickListener(view -> {
+                    Intent intent = new Intent(mContext, MainActivity.class);
+                    try {
+                        intent.putExtra(LATITUDE_COORDINATES,coords.getDouble("lat"));
+                        intent.putExtra(LONGITUDE_COORDINATES, coords.getDouble("lon"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+                    ((Activity) mContext).setResult(Activity.RESULT_OK, intent);
+                    ((Activity) mContext).finish();
                 });
             } catch (JSONException e){
                 e.printStackTrace();
@@ -111,7 +111,7 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
         });
         RequestQueue requestQueue = Volley.newRequestQueue(mContext);
         requestQueue.add(stringRequest);
-        // holder.mTextViewCityName.setText(mCityNames.get(i));
+
     }
 
     @Override
@@ -134,5 +134,4 @@ public class AllCitiesAdapter extends RecyclerView.Adapter<AllCitiesAdapter.AllC
             mLayout = itemView.findViewById(R.id.row_Layout);
         }
     }
-
 }

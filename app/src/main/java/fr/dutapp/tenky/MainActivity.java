@@ -1,7 +1,6 @@
 package fr.dutapp.tenky;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,8 +13,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,7 +39,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static fr.dutapp.tenky.AllCitiesActivity.ALL_CITIES_ACTIVITY_REQUEST_CODE;
+import fr.dutapp.tenky.allcities.AllCitiesActivity;
+import fr.dutapp.tenky.settings.SettingsActivity;
+
+import static fr.dutapp.tenky.allcities.AllCitiesActivity.ALL_CITIES_ACTIVITY_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private static final long MIN_TIME_BW_UPDATES = 300000;
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5000;
-    public final static String apiKey = "6b9eb0c4a410dfaf06f6fa358eb6ffba";
+    public final static String apiKey = "d70a31d1df42f92474ac82c282c143e8";
     public final static String url = "https://api.openweathermap.org/data/2.5/onecall?lat=";
     private String mLocale;
 
@@ -71,8 +71,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private TextView mJ5text;
     private TextView mJ6text;
     private TextView mJ7text;
-    private TextView mJ8text;
-    private TextView mJ9text;
     private TextView mJ2MMtext;
     private TextView mJ3MMtext;
     private TextView mJ4MMtext;
@@ -183,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             mLocale = "en";
         }
         this.mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        mUnits = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
+        mUnits = mPrefs.getBoolean("unitChoice", false) ? "imperial" : "metric";
 
         getCoordinates();
         displayWeather(mLat, mLon);
@@ -206,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             if (!isGPSEnabled && !isNetworkEnabled) {
             } else {
-                Log.d("ui", "pas activ");
                 // First get location from Network Provider
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -256,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onRestart() {
         super.onRestart();
-        mUnits = mPrefs.getBoolean("unitChoice", true) ? "metric" : "imperial";
+        mUnits = mPrefs.getBoolean("unitChoice", false) ? "imperial" : "metric";
         displayWeather(mLat, mLon);
     }
 
@@ -286,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        Log.d("locationchanged", "moved!!");
+        Log.d("locationchanged", "moved!");
         //getCoordinates();
         //displayWeather(mLat, mLon);
     }

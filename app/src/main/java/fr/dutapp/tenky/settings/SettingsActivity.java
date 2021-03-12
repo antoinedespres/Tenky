@@ -1,16 +1,14 @@
-package fr.dutapp.tenky;
+package fr.dutapp.tenky.settings;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceFragmentCompat;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Map;
+import fr.dutapp.tenky.allcities.AllCitiesActivity;
+import fr.dutapp.tenky.R;
 
 public class SettingsActivity extends AppCompatActivity {
 

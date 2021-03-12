@@ -15,9 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Tenky">
 
-        <activity android:name=".SettingsActivity" android:screenOrientation="sensorPortrait"/>
+        <activity android:name=".settings.SettingsActivity" android:screenOrientation="sensorPortrait"/>
 
-        <activity android:name=".AllCitiesActivity"
+        <activity android:name=".allcities.AllCitiesActivity"
             android:screenOrientation="sensorPortrait">
         </activity>
         <activity android:name=".SplashScreenActivity"

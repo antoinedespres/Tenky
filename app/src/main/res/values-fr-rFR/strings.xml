@@ -10,7 +10,7 @@
     <string name="title_sunrise">"Lever "</string>
     <string name="title_sunset">Coucher</string>
     <string name="title_wind_speed">Vitesse du vent</string>
-    <string name="settings_temperature_unit_desc">Choisissez entre °F et °C</string>
+    <string name="settings_temperature_unit_desc">Activer pour utiliser le système impérial</string>
     <string name="settings_temperature_unit">Unité de température</string>
     <string name="title_feels_like">Ressenti</string>
     <string name="title_humidity">Humidité</string>
