@@ -1,0 +1,28 @@
+SECURITY NOTE - API Key Management
+====================================
+
+IMPORTANT: The OpenWeatherMap API key is currently hardcoded in the Constants class.
+
+For production releases, you should:
+
+1. Move the API key to local.properties (which is already in .gitignore):
+   Add this line to local.properties:
+   WEATHER_API_KEY=your_api_key_here
+
+2. Update app/build.gradle to read from local.properties:
+   android {
+       defaultConfig {
+           buildConfigField "String", "WEATHER_API_KEY", "\"${weatherApiKey}\""
+       }
+   }
+
+   def localProperties = new Properties()
+   localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+   def weatherApiKey = localProperties['WEATHER_API_KEY']
+
+3. Update Constants.java to use BuildConfig:
+   public static final String API_KEY = BuildConfig.WEATHER_API_KEY;
+
+4. Never commit local.properties or any file containing the actual API key to version control.
+
+This ensures the API key is not exposed in your source code repository.
