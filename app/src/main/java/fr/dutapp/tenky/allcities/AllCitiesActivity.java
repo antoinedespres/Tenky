@@ -56,13 +56,13 @@ public class AllCitiesActivity extends AppCompatActivity {
         mAdd.setOnClickListener(v -> {
             final Dialog dialog = new Dialog(AllCitiesActivity.this);
             dialog.setContentView(R.layout.custom_dialog);
-            dialog.setTitle("Title");
+            dialog.setTitle(R.string.title_city_name);
 
             Button button = dialog.findViewById(R.id.dialog_ok);
             Button button_cancel = dialog.findViewById(R.id.dialog_cancel);
+            EditText edit = dialog.findViewById(R.id.cityname_text);
 
             button.setOnClickListener(v12 -> {
-                EditText edit = dialog.findViewById(R.id.cityname_text);
                 String cityName = edit.getText().toString().trim();
 
                 if (!cityName.isEmpty()) {
@@ -77,7 +77,8 @@ public class AllCitiesActivity extends AppCompatActivity {
                     finish();
                     startActivity(getIntent());
                 } else {
-                    Log.w(TAG, "City name is empty");
+                    edit.setError(getString(R.string.noname));
+                    edit.requestFocus();
                 }
             });
 
