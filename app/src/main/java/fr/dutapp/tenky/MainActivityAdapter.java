@@ -2,7 +2,7 @@ package fr.dutapp.tenky;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,45 +23,29 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import fr.dutapp.tenky.utils.Constants;
+
 public class MainActivityAdapter extends RecyclerView.Adapter<MainActivityAdapter.MainActivityViewHolder>{
 
+    private static final String TAG = "MainActivityAdapter";
     private Context mContext;
-    private Map iconMap;
+    private Map<String, Integer> iconMap;
     private SharedPreferences mPrefs;
     private Double lat;
     private Double lon;
-
-
+    private RequestQueue mRequestQueue;
 
     public MainActivityAdapter (Context ctx, SharedPreferences prefs, double lat, double lon){
         mContext = ctx;
         mPrefs = prefs;
         this.lat = lat;
         this.lon = lon;
-        this.iconMap = new HashMap<String, Drawable>();
-        iconMap.put("ic_01d", R.drawable.ic_01d);
-        iconMap.put("ic_01n", R.drawable.ic_01n);
-        iconMap.put("ic_02d", R.drawable.ic_02d);
-        iconMap.put("ic_02n", R.drawable.ic_02n);
-        iconMap.put("ic_03d", R.drawable.ic_03d);
-        iconMap.put("ic_03n", R.drawable.ic_03n);
-        iconMap.put("ic_04d", R.drawable.ic_04d);
-        iconMap.put("ic_04n", R.drawable.ic_04n);
-        iconMap.put("ic_09d", R.drawable.ic_09d);
-        iconMap.put("ic_09n", R.drawable.ic_09n);
-        iconMap.put("ic_10d", R.drawable.ic_10d);
-        iconMap.put("ic_10n", R.drawable.ic_10n);
-        iconMap.put("ic_11d", R.drawable.ic_11d);
-        iconMap.put("ic_11n", R.drawable.ic_11n);
-        iconMap.put("ic_13d", R.drawable.ic_13d);
-        iconMap.put("ic_13n", R.drawable.ic_13n);
-        iconMap.put("ic_50d", R.drawable.ic_50d);
-        iconMap.put("ic_50n", R.drawable.ic_50n);
-
+        this.iconMap = Constants.getIconMap();
+        this.mRequestQueue = Volley.newRequestQueue(ctx);
     }
 
     @NonNull
@@ -75,42 +59,43 @@ public class MainActivityAdapter extends RecyclerView.Adapter<MainActivityAdapte
 
     @Override
     public void onBindViewHolder(@NonNull MainActivityViewHolder holder, int position) {
-
-        String units = mPrefs.getBoolean("unitChoice", false) ? "imperial" : "metric";
-
-        String fullURL = "https://api.openweathermap.org/data/2.5/onecall?lat="+lat+ "&lon=" + lon +"&units=" +  units + "&appid="+ MainActivity.apiKey;
+        String units = Constants.getUnits(mPrefs);
+        String fullURL = Constants.BASE_URL_ONECALL_25 + "?lat=" + lat + "&lon=" + lon + "&units=" + units + "&appid=" + Constants.API_KEY;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
                 JSONObject resp = new JSONObject(response);
                 JSONArray hourly = resp.getJSONArray("hourly");
-                JSONObject houly = hourly.getJSONObject(position);
+
+                if (position >= hourly.length()) {
+                    Log.w(TAG, "Position out of bounds: " + position);
+                    return;
+                }
+
+                JSONObject hourlyData = hourly.getJSONObject(position);
 
                 TimeZone.setDefault(TimeZone.getTimeZone(resp.getString("timezone")));
-                SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-                //int timezone = resp.getInt("timezone_offset");
+                SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
-                Date hour = new Date((houly.getLong("dt")) * 1000);
+                Date hour = new Date(hourlyData.getLong("dt") * 1000);
 
-                holder.mImageViewWea.setImageResource((int) this.iconMap.get("ic_" + houly.getJSONArray("weather").getJSONObject(0).getString("icon") ));
+                String iconKey = "ic_" + hourlyData.getJSONArray("weather").getJSONObject(0).getString("icon");
+                Integer iconResource = iconMap.get(iconKey);
+                if (iconResource != null) {
+                    holder.mImageViewWea.setImageResource(iconResource);
+                }
                 holder.mTextViewHour.setText(format.format(hour));
-                holder.mTextViewTemp.setText(Math.round(houly.getDouble("temp")) + "°");
+                holder.mTextViewTemp.setText(Math.round(hourlyData.getDouble("temp")) + "°");
 
-
-            } catch (JSONException e){
-                e.printStackTrace();
+            } catch (JSONException e) {
+                Log.e(TAG, "Error parsing hourly weather data at position: " + position, e);
             }
         }, error -> {
-            try {
-                throw new Exception("Bad URL request");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Log.e(TAG, "Error fetching hourly weather data", error);
         });
-        RequestQueue requestQueue = Volley.newRequestQueue(mContext);
-        requestQueue.add(stringRequest);
 
-
+        stringRequest.setTag(TAG);
+        mRequestQueue.add(stringRequest);
     }
 
 

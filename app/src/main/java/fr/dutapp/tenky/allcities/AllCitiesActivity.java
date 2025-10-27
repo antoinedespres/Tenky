@@ -19,12 +19,11 @@ import java.util.ArrayList;
 
 import fr.dutapp.tenky.R;
 import fr.dutapp.tenky.settings.SettingsActivity;
-
-import static fr.dutapp.tenky.MainActivity.getDefaultSharedPreferencesName;
+import fr.dutapp.tenky.utils.Constants;
 
 public class AllCitiesActivity extends AppCompatActivity {
 
-    public static final int ALL_CITIES_ACTIVITY_REQUEST_CODE = 2;
+    private static final String TAG = "AllCitiesActivity";
     public static final String LATITUDE_COORDINATES = "LATITUDE_COORDINATES";
     public static final String LONGITUDE_COORDINATES = "LONGITUDE_COORDINATES";
     public static final String CITY_LIST = "CITY_LIST";
@@ -42,13 +41,16 @@ public class AllCitiesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_all_cities);
 
         mRecyclerView = findViewById(R.id.recycler_view_all_cities);
-        mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        mPrefs = getSharedPreferences(Constants.getDefaultSharedPreferencesName(this), MODE_PRIVATE);
         mAdd = findViewById(R.id.buttonAdd);
         mClear = findViewById(R.id.button_reset_list);
 
         mCityNames = new ArrayList<>();
         for (int i = 0; i < mPrefs.getInt("nbrCities", 0); ++i) {
-            mCityNames.add(mPrefs.getString("ville" + i + "", ""));
+            String cityName = mPrefs.getString("ville" + i, "");
+            if (!cityName.isEmpty()) {
+                mCityNames.add(cityName);
+            }
         }
 
         mAdd.setOnClickListener(v -> {
@@ -60,18 +62,23 @@ public class AllCitiesActivity extends AppCompatActivity {
             Button button_cancel = dialog.findViewById(R.id.dialog_cancel);
 
             button.setOnClickListener(v12 -> {
-
                 EditText edit = dialog.findViewById(R.id.cityname_text);
-                String cityName = edit.getText().toString();
-                SharedPreferences.Editor editor = mPrefs.edit();
-                editor.putString("ville" + mPrefs.getInt("nbrCities", 0) + "", cityName);
-                editor.putInt("nbrCities", mPrefs.getInt("nbrCities", 0) + 1);
-                editor.apply();
+                String cityName = edit.getText().toString().trim();
 
-                dialog.dismiss();
-                // Reload the Activity
-                finish();
-                startActivity(getIntent());
+                if (!cityName.isEmpty()) {
+                    SharedPreferences.Editor editor = mPrefs.edit();
+                    int currentCount = mPrefs.getInt("nbrCities", 0);
+                    editor.putString("ville" + currentCount, cityName);
+                    editor.putInt("nbrCities", currentCount + 1);
+                    editor.apply();
+
+                    dialog.dismiss();
+                    // Reload the Activity
+                    finish();
+                    startActivity(getIntent());
+                } else {
+                    Log.w(TAG, "City name is empty");
+                }
             });
 
             button_cancel.setOnClickListener(v1 -> dialog.dismiss());
@@ -81,13 +88,13 @@ public class AllCitiesActivity extends AppCompatActivity {
 
         mClear.setOnClickListener(v -> {
             SharedPreferences.Editor edit = mPrefs.edit();
-            for (int i = 0; i < mPrefs.getInt("nbrCities", 0); ++i) {
-                edit.remove("ville" + i + "");
-                edit.apply();
+            int cityCount = mPrefs.getInt("nbrCities", 0);
+            for (int i = 0; i < cityCount; ++i) {
+                edit.remove("ville" + i);
             }
-
             edit.putInt("nbrCities", 0);
             edit.apply();
+
             finish();
             startActivity(getIntent());
         });

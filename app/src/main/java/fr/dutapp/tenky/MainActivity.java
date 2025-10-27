@@ -43,17 +43,14 @@ import java.util.TimeZone;
 
 import fr.dutapp.tenky.allcities.AllCitiesActivity;
 import fr.dutapp.tenky.settings.SettingsActivity;
+import fr.dutapp.tenky.utils.Constants;
 
-import static fr.dutapp.tenky.allcities.AllCitiesActivity.ALL_CITIES_ACTIVITY_REQUEST_CODE;
+import static fr.dutapp.tenky.utils.Constants.ALL_CITIES_ACTIVITY_REQUEST_CODE;
+import static fr.dutapp.tenky.utils.Constants.LOCATION_PERMISSION_REQUEST_CODE;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
-    public static final int MAIN_ACTIVITY_REQUEST_CODE = 1;
-
-    private static final long MIN_TIME_BW_UPDATES = 300000;
-    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5000;
-    public final static String apiKey = "2d16a26b9de301ad0c8d42865664d50e";
-    public final static String url = "https://api.openweathermap.org/data/3.0/onecall?lat=";
+    private static final String TAG = "MainActivity";
     private String mLocale;
 
     private TextView mTemperature;
@@ -68,12 +65,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private String mUnits;
     private ImageView mcurrWea;
     private ImageView mBG;
-    private Map<String, Integer> iconMap;
-    private Map<String, Integer> imgMap;
     private SharedPreferences mPrefs;
     private RecyclerView mRecyclerView;
     private RecyclerView mDailyWeatherRecyclerView;
     private DailyWeatherAdapter mDailyWeatherAdapter;
+    private RequestQueue mRequestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,42 +88,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mRecyclerView = findViewById(R.id.main_activity_recycler_view);
         mDailyWeatherRecyclerView = findViewById(R.id.daily_weather_recycler_view);
 
-        this.iconMap = new HashMap<>();
-        iconMap.put("ic_01d", R.drawable.ic_01d);
-        iconMap.put("ic_01n", R.drawable.ic_01n);
-        iconMap.put("ic_02d", R.drawable.ic_02d);
-        iconMap.put("ic_02n", R.drawable.ic_02n);
-        iconMap.put("ic_03d", R.drawable.ic_03d);
-        iconMap.put("ic_03n", R.drawable.ic_03n);
-        iconMap.put("ic_04d", R.drawable.ic_04d);
-        iconMap.put("ic_04n", R.drawable.ic_04n);
-        iconMap.put("ic_09d", R.drawable.ic_09d);
-        iconMap.put("ic_09n", R.drawable.ic_09n);
-        iconMap.put("ic_10d", R.drawable.ic_10d);
-        iconMap.put("ic_10n", R.drawable.ic_10n);
-        iconMap.put("ic_11d", R.drawable.ic_11d);
-        iconMap.put("ic_11n", R.drawable.ic_11n);
-        iconMap.put("ic_13d", R.drawable.ic_13d);
-        iconMap.put("ic_13n", R.drawable.ic_13n);
-        iconMap.put("ic_50d", R.drawable.ic_50d);
-        iconMap.put("ic_50n", R.drawable.ic_50n);
+        // Initialize request queue
+        mRequestQueue = Volley.newRequestQueue(this);
 
-        this.imgMap = new HashMap<>();
-        imgMap.put("img_200", R.drawable.img_200);
-        imgMap.put("img_300", R.drawable.img_300);
-        imgMap.put("img_500", R.drawable.img_500);
-        imgMap.put("img_600", R.drawable.img_600);
-        imgMap.put("img_700", R.drawable.img_700);
-        imgMap.put("img_800", R.drawable.img_800);
-        imgMap.put("img_80x", R.drawable.img_80x);
-
-        if(Locale.getDefault().getLanguage() == "fr") {
+        // Fix: Use .equals() for string comparison instead of ==
+        if("fr".equals(Locale.getDefault().getLanguage())) {
             mLocale = "fr";
         } else {
             mLocale = "en";
         }
-        this.mPrefs = getSharedPreferences(getDefaultSharedPreferencesName(this), MODE_PRIVATE);
-        mUnits = mPrefs.getBoolean("unitChoice", false) ? "imperial" : "metric";
+
+        this.mPrefs = getSharedPreferences(Constants.getDefaultSharedPreferencesName(this), MODE_PRIVATE);
+        mUnits = Constants.getUnits(mPrefs);
 
         getCoordinates();
         displayWeather(mLat, mLon);
@@ -156,45 +128,49 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             if (!isGPSEnabled && !isNetworkEnabled) {
             } else {
                 // First get location from Network Provider
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-                    ActivityCompat.requestPermissions(this, permissions, 1);
+                    ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+                    return;
                 }
                 if (isNetworkEnabled) {
-
-                    mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d("Network", "Network enabled");
-                    if (mLocationManager != null) {
-                        mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (mLocation != null) {
-                            Log.d("location", "by network");
-                            mLat = mLocation.getLatitude();
-                            mLon = mLocation.getLongitude();
-                        }
+                    mLocationManager.requestLocationUpdates(
+                            LocationManager.NETWORK_PROVIDER,
+                            Constants.MIN_TIME_BW_UPDATES,
+                            Constants.MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                            this
+                    );
+                    Log.d(TAG, "Network provider enabled");
+                    mLocation = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                    if (mLocation != null) {
+                        Log.d(TAG, "Location obtained from network");
+                        mLat = mLocation.getLatitude();
+                        mLon = mLocation.getLongitude();
                     }
                 }
 
-                //get the location by gps
-                if (isGPSEnabled) {
-                    if (mLocation == null) {
-                        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                        Log.d("GPS Enabled", "GPS Enabled");
-                        if (mLocationManager != null) {
-
-                            mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                            if (mLocation != null) {
-                                Log.d("location", "by gps");
-                                mLat = mLocation.getLatitude();
-                                mLon = mLocation.getLongitude();
-                            }
-                        }
+                // Get the location by GPS
+                if (isGPSEnabled && mLocation == null) {
+                    mLocationManager.requestLocationUpdates(
+                            LocationManager.GPS_PROVIDER,
+                            Constants.MIN_TIME_BW_UPDATES,
+                            Constants.MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                            this
+                    );
+                    Log.d(TAG, "GPS provider enabled");
+                    mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    if (mLocation != null) {
+                        Log.d(TAG, "Location obtained from GPS");
+                        mLat = mLocation.getLatitude();
+                        mLon = mLocation.getLongitude();
                     }
                 }
             }
-
+        } catch (SecurityException e) {
+            Log.e(TAG, "Location permission denied", e);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error getting location", e);
         }
     }
 
@@ -204,8 +180,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     @Override
     public void onRestart() {
         super.onRestart();
-        mUnits = mPrefs.getBoolean("unitChoice", false) ? "imperial" : "metric";
+        mUnits = Constants.getUnits(mPrefs);
         displayWeather(mLat, mLon);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Fix: Stop location updates to prevent memory leaks
+        if (mLocationManager != null) {
+            mLocationManager.removeUpdates(this);
+        }
+        // Cancel all pending requests
+        if (mRequestQueue != null) {
+            mRequestQueue.cancelAll(TAG);
+        }
     }
 
     @Override
@@ -234,27 +223,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        Log.d("locationchanged", "moved!");
-        //getCoordinates();
-        //displayWeather(mLat, mLon);
+        Log.d(TAG, "Location changed");
+        mLat = location.getLatitude();
+        mLon = location.getLongitude();
+        displayWeather(mLat, mLon);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (RESULT_OK == resultCode) {
-            Log.d("onActivityResult", "Method called in MainActivity");
+        if (RESULT_OK == resultCode && data != null) {
+            Log.d(TAG, "Received coordinates from AllCitiesActivity");
             // Default location: Paris, France
             mLat = data.getDoubleExtra(AllCitiesActivity.LATITUDE_COORDINATES, 48.86);
             mLon = data.getDoubleExtra(AllCitiesActivity.LONGITUDE_COORDINATES, 2.34);
             displayWeather(mLat, mLon);
-        }
-        else{
+        } else {
             getCoordinates();
             displayWeather(mLat, mLon);
         }
-
     }
 
     /**
@@ -263,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      * @param cityName The name of the city
      */
     public void displayWeather(String cityName) {
-        String fullURL = "https://api.openweathermap.org/data/3.0/weather?q=" + cityName + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
+        String fullURL = Constants.BASE_URL_WEATHER + "?q=" + cityName + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + Constants.API_KEY;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
@@ -273,18 +261,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 double lon = coord.getDouble("lon");
                 displayWeather(lat, lon);
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error parsing weather response for city: " + cityName, e);
             }
         }, error -> {
-            try {
-                throw new Exception("Bad URL request");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Log.e(TAG, "Error fetching weather for city: " + cityName, error);
         });
 
-        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
-        requestQueue.add(stringRequest);
+        stringRequest.setTag(TAG);
+        mRequestQueue.add(stringRequest);
     }
 
     /**
@@ -294,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      * @param lon Longitude coordinate
      */
     public void displayWeather(double lat, double lon) {
-        String fullURL = url + lat + "&lon=" + lon + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
+        String fullURL = Constants.BASE_URL_ONECALL + "?lat=" + lat + "&lon=" + lon + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + Constants.API_KEY;
 
         StringRequest str = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
@@ -312,18 +296,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 JSONArray w = current.getJSONArray("weather");
                 mDesc.setText(w.getJSONObject(0).getString("description"));
 
-                if(w.getJSONObject(0).getInt("id") == 800){
-                    mBG.setImageResource((int) this.imgMap.get("img_800"));
-                }else if(w.getJSONObject(0).getInt("id") > 800){
-                    mBG.setImageResource((int) this.imgMap.get("img_80x"));
-                }
-
-                else {
-                    int code = (int) (w.getJSONObject(0).getInt("id")/100) * 100;
-
-                    Log.d("image", code + "");
-                    mBG.setImageResource((int) this.imgMap.get("img_" + code));
-
+                // Set background image based on weather code
+                int weatherCode = w.getJSONObject(0).getInt("id");
+                Map<String, Integer> imgMap = Constants.getImgMap();
+                if (weatherCode == 800) {
+                    Integer imgResource = imgMap.get("img_800");
+                    if (imgResource != null) {
+                        mBG.setImageResource(imgResource);
+                    }
+                } else if (weatherCode > 800) {
+                    Integer imgResource = imgMap.get("img_80x");
+                    if (imgResource != null) {
+                        mBG.setImageResource(imgResource);
+                    }
+                } else {
+                    int code = (weatherCode / 100) * 100;
+                    Integer imgResource = imgMap.get("img_" + code);
+                    if (imgResource != null) {
+                        mBG.setImageResource(imgResource);
+                    }
                 }
                 mBG.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
@@ -350,56 +341,40 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                 mDailyWeatherAdapter.updateData(dailyWeatherList);
 
-                String windSpeedUnit = mUnits == "metric" ? " km/h" : " mph";
+                // Fix: Use .equals() for string comparison
+                String windSpeedUnit = Constants.UNIT_METRIC.equals(mUnits) ? " km/h" : " mph";
                 mWindSpeed.setText(Math.round(current.getDouble("wind_speed")) + windSpeedUnit);
 
-                mcurrWea.setImageResource((int) this.iconMap.get("ic_" + w.getJSONObject(0).getString("icon")));
+                Map<String, Integer> iconMap = Constants.getIconMap();
+                Integer iconResource = iconMap.get("ic_" + w.getJSONObject(0).getString("icon"));
+                if (iconResource != null) {
+                    mcurrWea.setImageResource(iconResource);
+                }
 
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error parsing weather data", e);
             }
         }, error -> {
-            try {
-                throw new Exception("Bad URL request");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Log.e(TAG, "Error fetching weather data for coordinates: " + lat + ", " + lon, error);
         });
 
-        RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
-        requestQueue.add(str);
+        str.setTag(TAG);
+        mRequestQueue.add(str);
 
-        // second API call to get the name of the city
-        String Url = "https://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
-        StringRequest stringRequest2 = new StringRequest(Request.Method.GET, Url, response -> {
+        // Second API call to get the name of the city
+        String cityUrl = Constants.BASE_URL_WEATHER + "?lat=" + lat + "&lon=" + lon + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + Constants.API_KEY;
+        StringRequest stringRequest2 = new StringRequest(Request.Method.GET, cityUrl, response -> {
             try {
-
                 JSONObject object = new JSONObject(response);
                 mCityName.setText(object.getString("name"));
             } catch (JSONException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error parsing city name", e);
             }
         }, error -> {
-            try {
-                throw new Exception("Bad URL request");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Log.e(TAG, "Error fetching city name", error);
         });
 
-        requestQueue.add(stringRequest2);
-
-
-
-    }
-
-    /**
-     * Gets the default SharedPreferences' file name
-     *
-     * @param context
-     * @return Default SharedPreferences' file name
-     */
-    public static final String getDefaultSharedPreferencesName(Context context) {
-        return context.getPackageName() + "_preferences";
+        stringRequest2.setTag(TAG);
+        mRequestQueue.add(stringRequest2);
     }
 }

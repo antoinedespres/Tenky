@@ -10,9 +10,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import fr.dutapp.tenky.utils.Constants;
 
 public class DailyWeatherAdapter extends RecyclerView.Adapter<DailyWeatherAdapter.DailyWeatherViewHolder> {
 
@@ -22,27 +24,8 @@ public class DailyWeatherAdapter extends RecyclerView.Adapter<DailyWeatherAdapte
 
     public DailyWeatherAdapter(Context context, List<DailyWeather> dailyWeatherList) {
         mContext = context;
-        mDailyWeatherList = dailyWeatherList;
-
-        this.iconMap = new HashMap<>();
-        iconMap.put("ic_01d", R.drawable.ic_01d);
-        iconMap.put("ic_01n", R.drawable.ic_01n);
-        iconMap.put("ic_02d", R.drawable.ic_02d);
-        iconMap.put("ic_02n", R.drawable.ic_02n);
-        iconMap.put("ic_03d", R.drawable.ic_03d);
-        iconMap.put("ic_03n", R.drawable.ic_03n);
-        iconMap.put("ic_04d", R.drawable.ic_04d);
-        iconMap.put("ic_04n", R.drawable.ic_04n);
-        iconMap.put("ic_09d", R.drawable.ic_09d);
-        iconMap.put("ic_09n", R.drawable.ic_09n);
-        iconMap.put("ic_10d", R.drawable.ic_10d);
-        iconMap.put("ic_10n", R.drawable.ic_10n);
-        iconMap.put("ic_11d", R.drawable.ic_11d);
-        iconMap.put("ic_11n", R.drawable.ic_11n);
-        iconMap.put("ic_13d", R.drawable.ic_13d);
-        iconMap.put("ic_13n", R.drawable.ic_13n);
-        iconMap.put("ic_50d", R.drawable.ic_50d);
-        iconMap.put("ic_50n", R.drawable.ic_50n);
+        mDailyWeatherList = new ArrayList<>(dailyWeatherList);
+        this.iconMap = Constants.getIconMap();
     }
 
     @NonNull
@@ -73,7 +56,8 @@ public class DailyWeatherAdapter extends RecyclerView.Adapter<DailyWeatherAdapte
     }
 
     public void updateData(List<DailyWeather> newDailyWeatherList) {
-        mDailyWeatherList = newDailyWeatherList;
+        mDailyWeatherList.clear();
+        mDailyWeatherList.addAll(newDailyWeatherList);
         notifyDataSetChanged();
     }
 
