@@ -52,8 +52,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private static final long MIN_TIME_BW_UPDATES = 300000;
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5000;
-    public final static String apiKey = "d70a31d1df42f92474ac82c282c143e8";
-    public final static String url = "https://api.openweathermap.org/data/2.5/onecall?lat=";
+    public final static String apiKey = "2d16a26b9de301ad0c8d42865664d50e";
+    public final static String url = "https://api.openweathermap.org/data/3.0/onecall?lat=";
     private String mLocale;
 
     private TextView mTemperature;
@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      * @param cityName The name of the city
      */
     public void displayWeather(String cityName) {
-        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
+        String fullURL = "https://api.openweathermap.org/data/3.0/weather?q=" + cityName + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
