@@ -33,8 +33,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -50,37 +52,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     private static final long MIN_TIME_BW_UPDATES = 300000;
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5000;
-    public final static String apiKey = "d70a31d1df42f92474ac82c282c143e8";
-    public final static String url = "https://api.openweathermap.org/data/2.5/onecall?lat=";
+    public final static String apiKey = "2d16a26b9de301ad0c8d42865664d50e";
+    public final static String url = "https://api.openweathermap.org/data/3.0/onecall?lat=";
     private String mLocale;
 
     private TextView mTemperature;
     private TextView mCityName;
     private TextView mSunrise, mSunset, mWindSpeed;
-    private TextView mTomorrowtext;
-    private TextView mTomorrowMMtext;
-    private TextView mJ2;
-    private TextView mJ3;
-    private TextView mJ4;
-    private TextView mJ5;
-    private TextView mJ6;
-    private TextView mJ7;
-    private TextView mJ2text;
-    private TextView mJ3text;
-    private TextView mJ4text;
-    private TextView mJ5text;
-    private TextView mJ6text;
-    private TextView mJ7text;
-    private TextView mJ2MMtext;
-    private TextView mJ3MMtext;
-    private TextView mJ4MMtext;
-    private TextView mJ5MMtext;
-    private TextView mJ6MMtext;
-    private TextView mJ7MMtext;
-
     private TextView mFeelsLike;
-    private TextView mMinTemp;
-    private TextView mMaxTemp;
     private TextView mHumidity;
     private TextView mDesc;
     private LocationManager mLocationManager;
@@ -88,18 +67,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private Location mLocation;
     private String mUnits;
     private ImageView mcurrWea;
-    private ImageView mWeaTom;
-    private ImageView mWeaJ2;
-    private ImageView mWeaJ3;
-    private ImageView mWeaJ4;
-    private ImageView mWeaJ5;
-    private ImageView mWeaJ6;
-    private ImageView mWeaJ7;
     private ImageView mBG;
-    private Map iconMap;
-    private Map imgMap;
+    private Map<String, Integer> iconMap;
+    private Map<String, Integer> imgMap;
     private SharedPreferences mPrefs;
     private RecyclerView mRecyclerView;
+    private RecyclerView mDailyWeatherRecyclerView;
+    private DailyWeatherAdapter mDailyWeatherAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,41 +86,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mSunset = findViewById(R.id.textViewSunsetValue);
         mWindSpeed = findViewById(R.id.textViewWindSpeedValue);
         mFeelsLike = findViewById(R.id.textViewFeelsLike);
-        mMinTemp = findViewById(R.id.textViewMinMaxJ2);
-        mMaxTemp = findViewById(R.id.textViewMinMaxTom);
         mHumidity = findViewById(R.id.textViewHumidity);
         mDesc = findViewById(R.id.textViewDesc);
-        mTomorrowtext = findViewById(R.id.textViewJ1value);
-        mJ2text = findViewById(R.id.textViewJ2value);
-        mJ3text = findViewById(R.id.textViewJ3value);
-        mJ4text = findViewById(R.id.textViewJ4value);
-        mJ5text = findViewById(R.id.textViewJ5value);
-        mJ6text = findViewById(R.id.textViewJ6value);
-        mJ7text = findViewById(R.id.textViewJ7value);
-        mJ2MMtext = findViewById(R.id.textViewMinMaxJ2);
-        mJ3MMtext = findViewById(R.id.textViewMinMaxJ3);
-        mJ4MMtext = findViewById(R.id.textViewMinMaxJ4);
-        mJ5MMtext = findViewById(R.id.textViewMinMaxJ5);
-        mJ6MMtext = findViewById(R.id.textViewMinMaxJ6);
-        mJ7MMtext = findViewById(R.id.textViewMinMaxJ7);
-        mTomorrowMMtext = findViewById(R.id.textViewMinMaxTom);
         mcurrWea = findViewById(R.id.imageCurrentWea);
-        mWeaJ2 = findViewById(R.id.imageViewJ2);
-        mWeaJ3 = findViewById(R.id.imageViewJ3);
-        mWeaJ4 = findViewById(R.id.imageViewJ4);
-        mWeaJ5 = findViewById(R.id.imageViewJ5);
-        mWeaJ6 = findViewById(R.id.imageViewJ6);
-        mWeaJ7 = findViewById(R.id.imageViewJ7);
-        mWeaTom = findViewById(R.id.imageViewTom);
-        mJ2 = findViewById(R.id.textViewJ2);
-        mJ3 = findViewById(R.id.textViewJ3);
-        mJ4 = findViewById(R.id.textViewJ4);
-        mJ5 = findViewById(R.id.textViewJ5);
-        mJ6 = findViewById(R.id.textViewJ6);
-        mJ7 = findViewById(R.id.textViewJ7);
         mRecyclerView = findViewById(R.id.main_activity_recycler_view);
+        mDailyWeatherRecyclerView = findViewById(R.id.daily_weather_recycler_view);
 
-        this.iconMap = new HashMap<String, Drawable>();
+        this.iconMap = new HashMap<>();
         iconMap.put("ic_01d", R.drawable.ic_01d);
         iconMap.put("ic_01n", R.drawable.ic_01n);
         iconMap.put("ic_02d", R.drawable.ic_02d);
@@ -166,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         iconMap.put("ic_50d", R.drawable.ic_50d);
         iconMap.put("ic_50n", R.drawable.ic_50n);
 
-        this.imgMap = new HashMap<String, Drawable>();
+        this.imgMap = new HashMap<>();
         imgMap.put("img_200", R.drawable.img_200);
         imgMap.put("img_300", R.drawable.img_300);
         imgMap.put("img_500", R.drawable.img_500);
@@ -190,6 +136,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         LinearLayoutManager l = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setAdapter(mActivity);
         mRecyclerView.setLayoutManager(l);
+
+        mDailyWeatherAdapter = new DailyWeatherAdapter(this, new ArrayList<>());
+        LinearLayoutManager dailyLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mDailyWeatherRecyclerView.setAdapter(mDailyWeatherAdapter);
+        mDailyWeatherRecyclerView.setLayoutManager(dailyLayoutManager);
     }
 
     public void getCoordinates() {
@@ -312,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
      * @param cityName The name of the city
      */
     public void displayWeather(String cityName) {
-        String fullURL = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
+        String fullURL = "https://api.openweathermap.org/data/3.0/weather?q=" + cityName + "&units=" + mUnits + "&lang=" + mLocale + "&appid=" + apiKey;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, fullURL, response -> {
             try {
@@ -383,55 +334,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 mSunrise.setText(format.format(sunrise));
                 mSunset.setText(format.format(sunset));
 
-                JSONObject tomorrow = daily.getJSONObject(1);
-                JSONObject day2 = daily.getJSONObject(2);
-                JSONObject day3 = daily.getJSONObject(3);
-                JSONObject day4 = daily.getJSONObject(4);
-                JSONObject day5 = daily.getJSONObject(5);
-                JSONObject day6 = daily.getJSONObject(6);
-                JSONObject day7 = daily.getJSONObject(7);
+                List<DailyWeather> dailyWeatherList = new ArrayList<>();
 
+                for (int i = 1; i <= 7; i++) {
+                    JSONObject dayData = daily.getJSONObject(i);
+                    Date dayDate = new Date(dayData.getLong("dt") * 1000);
+                    String dayName = fora.format(dayDate);
+                    int temperature = (int) Math.round(dayData.getJSONObject("temp").getDouble("day"));
+                    String minMaxTemp = Math.round(dayData.getJSONObject("temp").getDouble("max")) + "°/" +
+                                       Math.round(dayData.getJSONObject("temp").getDouble("min")) + "°";
+                    String weatherIcon = "ic_" + dayData.getJSONArray("weather").getJSONObject(0).getString("icon");
 
-                mTomorrowtext.setText(Math.round(tomorrow.getJSONObject("temp").getDouble("day")) + "°");
-                mTomorrowMMtext.setText(Math.round(tomorrow.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(tomorrow.getJSONObject("temp").getDouble("min")) + "°");
+                    dailyWeatherList.add(new DailyWeather(dayName, temperature, minMaxTemp, weatherIcon));
+                }
 
-                mJ2text.setText(Math.round(day2.getJSONObject("temp").getDouble("day")) + "°");
-                mJ2MMtext.setText(Math.round(day2.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day2.getJSONObject("temp").getDouble("min")) + "°");
-
-                mJ3text.setText(Math.round(day3.getJSONObject("temp").getDouble("day")) + "°");
-                mJ3MMtext.setText(Math.round(day3.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day3.getJSONObject("temp").getDouble("min")) + "°");
-
-                mJ4text.setText(Math.round(day4.getJSONObject("temp").getDouble("day")) + "°");
-                mJ4MMtext.setText(Math.round(day4.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day4.getJSONObject("temp").getDouble("min")) + "°");
-
-                mJ5text.setText(Math.round(day5.getJSONObject("temp").getDouble("day")) + "°");
-                mJ5MMtext.setText(Math.round(day5.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day5.getJSONObject("temp").getDouble("min")) + "°");
-
-                mJ6text.setText(Math.round(day6.getJSONObject("temp").getDouble("day")) + "°");
-                mJ6MMtext.setText(Math.round(day6.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day6.getJSONObject("temp").getDouble("min")) + "°");
-
-                mJ7text.setText(Math.round(day7.getJSONObject("temp").getDouble("day")) + "°");
-                mJ7MMtext.setText(Math.round(day7.getJSONObject("temp").getDouble("max")) + "°/" + Math.round(day7.getJSONObject("temp").getDouble("min")) + "°");
+                mDailyWeatherAdapter.updateData(dailyWeatherList);
 
                 String windSpeedUnit = mUnits == "metric" ? " km/h" : " mph";
                 mWindSpeed.setText(Math.round(current.getDouble("wind_speed")) + windSpeedUnit);
 
                 mcurrWea.setImageResource((int) this.iconMap.get("ic_" + w.getJSONObject(0).getString("icon")));
-
-                mWeaTom.setImageResource((int) this.iconMap.get("ic_" + tomorrow.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                mWeaJ2.setImageResource((int) this.iconMap.get("ic_" + day2.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                mWeaJ3.setImageResource((int) this.iconMap.get("ic_" + day3.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                mWeaJ4.setImageResource((int) this.iconMap.get("ic_" + day4.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                mWeaJ5.setImageResource((int) this.iconMap.get("ic_" + day5.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                mWeaJ6.setImageResource((int) this.iconMap.get("ic_" + day6.getJSONArray("weather").getJSONObject(0).getString("icon")));
-                mWeaJ7.setImageResource((int) this.iconMap.get("ic_" + day7.getJSONArray("weather").getJSONObject(0).getString("icon")));
-
-                mJ2.setText(fora.format(new Date((day2.getLong("dt")) * 1000)));
-                mJ3.setText(fora.format(new Date((day3.getLong("dt")) * 1000)));
-                mJ4.setText(fora.format(new Date((day4.getLong("dt") ) * 1000)));
-                mJ5.setText(fora.format(new Date((day5.getLong("dt")) * 1000)));
-                mJ6.setText(fora.format(new Date((day6.getLong("dt")) * 1000)));
-                mJ7.setText(fora.format(new Date((day7.getLong("dt")) * 1000)));
 
             } catch (JSONException e) {
                 e.printStackTrace();
