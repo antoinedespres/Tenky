@@ -28,7 +28,7 @@ object Constants {
     const val SPLASH_SCREEN_DELAY = 800
 
     // Weather icon mapping
-    private val iconMap: Map<String, Int> by lazy {
+    val iconMap: Map<String, Int> by lazy {
         mapOf(
             "ic_01d" to R.drawable.ic_01d,
             "ic_01n" to R.drawable.ic_01n,
@@ -51,7 +51,7 @@ object Constants {
         )
     }
 
-    private val imgMap: Map<String, Int> by lazy {
+    val imgMap: Map<String, Int> by lazy {
         mapOf(
             "img_200" to R.drawable.img_200,
             "img_300" to R.drawable.img_300,
@@ -62,9 +62,6 @@ object Constants {
             "img_80x" to R.drawable.img_80x
         )
     }
-
-    fun getIconMap(): Map<String, Int> = iconMap
-    fun getImgMap(): Map<String, Int> = imgMap
 
     fun getDefaultSharedPreferencesName(context: Context): String {
         return "${context.packageName}_preferences"

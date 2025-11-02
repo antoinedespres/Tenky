@@ -172,7 +172,7 @@ fun CityItem(
             )
 
             if (cityData.weatherIcon.isNotEmpty()) {
-                val iconMap = Constants.getIconMap()
+                val iconMap = Constants.iconMap
                 val iconRes = iconMap[cityData.weatherIcon] ?: 0
                 if (iconRes != 0) {
                     Image(

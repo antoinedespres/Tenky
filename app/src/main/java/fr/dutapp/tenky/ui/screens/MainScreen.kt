@@ -387,12 +387,12 @@ fun DailyWeatherItem(dailyWeather: DailyWeather) {
 }
 
 private fun getWeatherIconResource(iconKey: String): Int {
-    val iconMap = Constants.getIconMap()
+    val iconMap = Constants.iconMap
     return iconMap[iconKey] ?: 0
 }
 
 private fun getBackgroundImage(weatherCode: Int): Int {
-    val imgMap = Constants.getImgMap()
+    val imgMap = Constants.imgMap
     return when {
         weatherCode == 800 -> imgMap["img_800"] ?: R.drawable.img_800
         weatherCode > 800 -> imgMap["img_80x"] ?: R.drawable.img_80x
