@@ -173,32 +173,36 @@ fun MainScreen(
                             )
                         }
 
-                        item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Hourly Forecast",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            HourlyWeatherList(hourlyWeather = uiState.hourlyWeather)
+                        if (uiState.hourlyWeather.isNotEmpty()) {
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Hourly Forecast",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                HourlyWeatherList(hourlyWeather = uiState.hourlyWeather)
+                            }
                         }
 
-                        item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "7-Day Forecast",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
+                        if (uiState.dailyWeather.isNotEmpty()) {
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "7-Day Forecast",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
 
-                        items(uiState.dailyWeather) { day ->
-                            DailyWeatherItem(day)
-                            Spacer(modifier = Modifier.height(8.dp))
+                            items(uiState.dailyWeather) { day ->
+                                DailyWeatherItem(day)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
                     }
                 }

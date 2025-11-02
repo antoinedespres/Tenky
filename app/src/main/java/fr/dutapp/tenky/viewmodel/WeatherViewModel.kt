@@ -44,8 +44,6 @@ class WeatherViewModel : ViewModel() {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
             val weatherResult = repository.getWeather(latitude, longitude, units, lang)
-            val cityNameResult = repository.getCityName(latitude, longitude, units, lang)
-            val hourlyResult = repository.getHourlyWeather(latitude, longitude, units)
 
             weatherResult.onSuccess { weatherResponse ->
                 val current = weatherResponse.current
@@ -65,21 +63,9 @@ class WeatherViewModel : ViewModel() {
 
                 val windSpeedUnit = if (units == "metric") " km/h" else " mph"
 
-                var cityName = ""
-                cityNameResult.onSuccess { name ->
-                    cityName = name
-                }.onFailure {
-                    cityName = "Unknown"
-                }
-
-                var hourlyWeather = emptyList<HourlyWeather>()
-                hourlyResult.onSuccess { hourlyResponse ->
-                    hourlyWeather = hourlyResponse.hourly.take(24)
-                }
-
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    cityName = cityName,
+                    cityName = "Loading...",
                     temperature = "${current.temp.toInt()}°",
                     feelsLike = "${current.feelsLike.toInt()}°",
                     humidity = "${current.humidity} %",
@@ -90,13 +76,30 @@ class WeatherViewModel : ViewModel() {
                     sunrise = timeFormat.format(Date(current.sunrise * 1000)),
                     sunset = timeFormat.format(Date(current.sunset * 1000)),
                     dailyWeather = dailyWeatherList,
-                    hourlyWeather = hourlyWeather
+                    hourlyWeather = emptyList()
                 )
+
+                val cityNameResult = repository.getCityName(latitude, longitude, units, lang)
+                cityNameResult.onSuccess { name ->
+                    _uiState.value = _uiState.value.copy(cityName = name)
+                }.onFailure { error ->
+                    Log.e("WeatherViewModel", "Error loading city name", error)
+                    _uiState.value = _uiState.value.copy(cityName = "Unknown Location")
+                }
+
+                val hourlyResult = repository.getHourlyWeather(latitude, longitude, units)
+                hourlyResult.onSuccess { hourlyResponse ->
+                    _uiState.value = _uiState.value.copy(
+                        hourlyWeather = hourlyResponse.hourly.take(24)
+                    )
+                }.onFailure { error ->
+                    Log.e("WeatherViewModel", "Error loading hourly weather (non-critical)", error)
+                }
             }.onFailure { error ->
                 Log.e("WeatherViewModel", "Error loading weather", error)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = error.message
+                    error = error.message ?: "Failed to load weather data"
                 )
             }
         }
