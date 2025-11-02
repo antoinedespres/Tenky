@@ -69,8 +69,18 @@ fun MainScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        hasLocationPermission = granted
+
+        if (granted && selectedLatitude == null && selectedLongitude == null) {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    viewModel.loadWeather(location.latitude, location.longitude, units, locale)
+                }
+            }
+        }
     }
 
     LaunchedEffect(selectedLatitude, selectedLongitude, units) {
@@ -81,6 +91,8 @@ fun MainScreen(
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     viewModel.loadWeather(location.latitude, location.longitude, units, locale)
+                } else {
+                    viewModel.setError("Unable to get location. Please enable location services.")
                 }
             }
         } else {

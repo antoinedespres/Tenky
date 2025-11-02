@@ -65,8 +65,21 @@ class WeatherViewModel : ViewModel() {
 
                 val windSpeedUnit = if (units == "metric") " km/h" else " mph"
 
+                var cityName = ""
+                cityNameResult.onSuccess { name ->
+                    cityName = name
+                }.onFailure {
+                    cityName = "Unknown"
+                }
+
+                var hourlyWeather = emptyList<HourlyWeather>()
+                hourlyResult.onSuccess { hourlyResponse ->
+                    hourlyWeather = hourlyResponse.hourly.take(24)
+                }
+
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
+                    cityName = cityName,
                     temperature = "${current.temp.toInt()}°",
                     feelsLike = "${current.feelsLike.toInt()}°",
                     humidity = "${current.humidity} %",
@@ -76,7 +89,8 @@ class WeatherViewModel : ViewModel() {
                     weatherCode = current.weather.firstOrNull()?.id ?: 0,
                     sunrise = timeFormat.format(Date(current.sunrise * 1000)),
                     sunset = timeFormat.format(Date(current.sunset * 1000)),
-                    dailyWeather = dailyWeatherList
+                    dailyWeather = dailyWeatherList,
+                    hourlyWeather = hourlyWeather
                 )
             }.onFailure { error ->
                 Log.e("WeatherViewModel", "Error loading weather", error)
@@ -85,16 +99,13 @@ class WeatherViewModel : ViewModel() {
                     error = error.message
                 )
             }
-
-            cityNameResult.onSuccess { cityName ->
-                _uiState.value = _uiState.value.copy(cityName = cityName)
-            }
-
-            hourlyResult.onSuccess { hourlyResponse ->
-                _uiState.value = _uiState.value.copy(
-                    hourlyWeather = hourlyResponse.hourly.take(24)
-                )
-            }
         }
+    }
+
+    fun setError(message: String) {
+        _uiState.value = _uiState.value.copy(
+            isLoading = false,
+            error = message
+        )
     }
 }
