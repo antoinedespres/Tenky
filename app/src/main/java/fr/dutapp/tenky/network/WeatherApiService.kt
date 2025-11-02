@@ -16,14 +16,6 @@ interface WeatherApiService {
         @Query("appid") apiKey: String
     ): WeatherResponse
 
-    @GET("data/2.5/onecall")
-    suspend fun getWeatherOneCall25(
-        @Query("lat") latitude: Double,
-        @Query("lon") longitude: Double,
-        @Query("units") units: String,
-        @Query("appid") apiKey: String
-    ): WeatherResponse
-
     @GET("data/2.5/weather")
     suspend fun getCityWeather(
         @Query("q") cityName: String,

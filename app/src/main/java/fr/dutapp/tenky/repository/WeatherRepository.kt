@@ -70,23 +70,4 @@ class WeatherRepository {
             Result.failure(e)
         }
     }
-
-    suspend fun getHourlyWeather(
-        latitude: Double,
-        longitude: Double,
-        units: String
-    ): Result<WeatherResponse> {
-        return try {
-            val response = apiService.getWeatherOneCall25(
-                latitude = latitude,
-                longitude = longitude,
-                units = units,
-                apiKey = Constants.API_KEY
-            )
-            Result.success(response)
-        } catch (e: Exception) {
-            Log.e("WeatherRepository", "Error fetching hourly weather", e)
-            Result.failure(e)
-        }
-    }
 }

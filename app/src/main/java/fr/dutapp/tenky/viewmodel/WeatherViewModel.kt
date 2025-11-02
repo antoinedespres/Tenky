@@ -45,11 +45,21 @@ class WeatherViewModel : ViewModel() {
 
             val weatherResult = repository.getWeather(latitude, longitude, units, lang)
             val cityNameResult = repository.getCityName(latitude, longitude, units, lang)
-            val hourlyResult = repository.getHourlyWeather(latitude, longitude, units)
 
             weatherResult.onSuccess { weatherResponse ->
                 val current = weatherResponse.current
                 val daily = weatherResponse.daily
+                val hourly = weatherResponse.hourly
+
+                if (current == null || daily == null) {
+                    Log.e("WeatherViewModel", "Missing required weather data in response")
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = "Invalid weather data received"
+                    )
+                    return@onSuccess
+                }
+
                 val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
                 val dayFormat = SimpleDateFormat("E", Locale.getDefault())
 
@@ -63,6 +73,8 @@ class WeatherViewModel : ViewModel() {
                     )
                 }
 
+                val hourlyWeatherList = hourly?.take(24) ?: emptyList()
+
                 val windSpeedUnit = if (units == "metric") " km/h" else " mph"
 
                 _uiState.value = _uiState.value.copy(
@@ -74,9 +86,10 @@ class WeatherViewModel : ViewModel() {
                     description = current.weather.firstOrNull()?.description ?: "",
                     weatherIcon = "ic_${current.weather.firstOrNull()?.icon ?: ""}",
                     weatherCode = current.weather.firstOrNull()?.id ?: 0,
-                    sunrise = timeFormat.format(Date(current.sunrise * 1000)),
-                    sunset = timeFormat.format(Date(current.sunset * 1000)),
-                    dailyWeather = dailyWeatherList
+                    sunrise = timeFormat.format(Date((current.sunrise ?: 0) * 1000)),
+                    sunset = timeFormat.format(Date((current.sunset ?: 0) * 1000)),
+                    dailyWeather = dailyWeatherList,
+                    hourlyWeather = hourlyWeatherList
                 )
             }.onFailure { error ->
                 Log.e("WeatherViewModel", "Error loading weather", error)
@@ -88,12 +101,6 @@ class WeatherViewModel : ViewModel() {
 
             cityNameResult.onSuccess { cityName ->
                 _uiState.value = _uiState.value.copy(cityName = cityName)
-            }
-
-            hourlyResult.onSuccess { hourlyResponse ->
-                _uiState.value = _uiState.value.copy(
-                    hourlyWeather = hourlyResponse.hourly.take(24)
-                )
             }
         }
     }
