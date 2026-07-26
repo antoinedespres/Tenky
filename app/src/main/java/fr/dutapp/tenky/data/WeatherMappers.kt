@@ -9,6 +9,7 @@ import fr.dutapp.tenky.domain.model.CurrentWeather
 import fr.dutapp.tenky.domain.model.DailyForecast
 import fr.dutapp.tenky.domain.model.HourlyForecast
 import fr.dutapp.tenky.domain.model.SavedCity
+import fr.dutapp.tenky.domain.model.TemperaturePoint
 import fr.dutapp.tenky.domain.model.WindDirection
 import java.time.Instant
 import java.time.LocalDate
@@ -64,6 +65,17 @@ fun ForecastDto.toHourly(): List<HourlyForecast> {
             temperature = entry.main.temp,
             iconCode = entry.weather.firstOrNull()?.icon ?: FALLBACK_ICON,
             precipitationProbability = entry.pop.toFloat(),
+        )
+    }
+}
+
+/** Every three-hour step, in the local time of the city, for the trend chart. */
+fun ForecastDto.toTrend(): List<TemperaturePoint> {
+    val offset = zoneOffsetOf(city.timezone)
+    return list.map { entry ->
+        TemperaturePoint(
+            dateTime = entry.dt.atZone(offset).toLocalDateTime(),
+            temperature = entry.main.temp,
         )
     }
 }

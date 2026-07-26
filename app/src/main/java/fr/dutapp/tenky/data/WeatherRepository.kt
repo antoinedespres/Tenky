@@ -105,6 +105,7 @@ class WeatherRepository(
                 current = current.toDomain(),
                 hourly = forecast.toHourly(),
                 daily = forecast.toDaily(),
+                trend = forecast.toTrend(),
                 zoneOffset = zoneOffsetOf(current.timezone),
             )
         }

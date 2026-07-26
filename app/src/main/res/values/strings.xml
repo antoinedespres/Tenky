@@ -98,4 +98,5 @@
     <string name="error_not_found">No weather data for this place.</string>
     <string name="error_unknown">Something went wrong.</string>
     <string name="action_retry">Retry</string>
+    <string name="title_trend">5-day trend</string>
 </resources>
