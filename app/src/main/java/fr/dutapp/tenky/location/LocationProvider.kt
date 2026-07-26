@@ -65,7 +65,6 @@ class LocationProvider(private val context: Context) {
 
     @SuppressLint("MissingPermission") // Guarded by hasPermission() above.
     private fun LocationManager.freshestCachedLocation(): Location? = PROVIDERS
-        .filter { provider -> isProviderEnabledSafely(provider) }
         .mapNotNull { provider -> runCatching { getLastKnownLocation(provider) }.getOrNull() }
         .filter { location ->
             System.currentTimeMillis() - location.time <= MAX_CACHED_FIX_AGE_MILLIS
@@ -73,17 +72,20 @@ class LocationProvider(private val context: Context) {
         .maxByOrNull(Location::getTime)
 
     /**
-     * Listens on every enabled provider at once and takes the first fix.
+     * Listens on every provider at once and takes the first fix.
      *
-     * Asking only the first enabled provider meant a device with GPS as its
-     * only enabled provider waited out the whole timeout indoors, where a cold
-     * GPS fix rarely arrives, even though a coarse fix was available elsewhere.
+     * Providers are deliberately not filtered by `isProviderEnabled` first.
+     * That reads the legacy `location_providers_allowed` setting, which only
+     * ever lists gps and network — so the fused provider, the one that resolves
+     * indoors, was reported as disabled and never asked, leaving a device with
+     * GPS as its only listed provider waiting out the whole timeout for a cold
+     * lock that rarely arrives inside.
+     *
+     * Registering on a provider that is switched off is harmless: it simply
+     * never delivers. An unknown provider throws, and is skipped.
      */
     @SuppressLint("MissingPermission") // Guarded by hasPermission() above.
     private suspend fun LocationManager.awaitFirstFix(): Location? {
-        val providers = PROVIDERS.filter { isProviderEnabledSafely(it) }
-        if (providers.isEmpty()) return null
-
         return suspendCancellableCoroutine { continuation ->
             val listeners = mutableListOf<LocationListener>()
 
@@ -92,7 +94,7 @@ class LocationProvider(private val context: Context) {
                 listeners.clear()
             }
 
-            providers.forEach { provider ->
+            PROVIDERS.forEach { provider ->
                 // android.location.LocationListener only gained default methods
                 // in API 30, so every method is implemented for older devices.
                 val listener = object : LocationListener {
@@ -111,18 +113,21 @@ class LocationProvider(private val context: Context) {
                         extras: Bundle?,
                     ) = Unit
                 }
-                listeners += listener
                 runCatching {
                     requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())
-                }
+                }.onSuccess { listeners += listener }
+            }
+
+            // Nothing accepted a request, so waiting out the timeout would tell
+            // the user nothing they could not be told now.
+            if (listeners.isEmpty() && continuation.isActive) {
+                continuation.resume(null)
+                return@suspendCancellableCoroutine
             }
 
             continuation.invokeOnCancellation { stopListening() }
         }
     }
-
-    private fun LocationManager.isProviderEnabledSafely(provider: String): Boolean =
-        runCatching { isProviderEnabled(provider) }.getOrDefault(false)
 
     private fun Location.toCoordinates() = Coordinates(latitude, longitude)
 
