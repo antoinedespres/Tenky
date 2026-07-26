@@ -3,8 +3,8 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    namespace "fr.dutapp.tenky"
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "fr.dutapp.tenky"
