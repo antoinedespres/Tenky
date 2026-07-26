@@ -10,6 +10,8 @@ data class CurrentWeatherDto(
     val weather: List<WeatherDescriptionDto> = emptyList(),
     val main: MainDto,
     val wind: WindDto = WindDto(),
+    /** Metres, capped at 10000 by the API. */
+    val visibility: Int? = null,
     val dt: Long,
     val sys: SysDto = SysDto(),
     /** Shift in seconds from UTC for the requested location. */
@@ -37,11 +39,15 @@ data class MainDto(
     @SerialName("temp_min") val tempMin: Double = temp,
     @SerialName("temp_max") val tempMax: Double = temp,
     val humidity: Int = 0,
+    /** hPa at sea level. */
+    val pressure: Int = 0,
 )
 
 @Serializable
 data class WindDto(
     val speed: Double = 0.0,
+    /** Meteorological degrees: the direction the wind blows *from*. */
+    val deg: Int? = null,
 )
 
 @Serializable

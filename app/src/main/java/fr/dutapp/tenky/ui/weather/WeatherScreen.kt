@@ -25,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +34,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -54,14 +59,19 @@ import fr.dutapp.tenky.location.LocationProvider
 import fr.dutapp.tenky.ui.components.ErrorState
 import fr.dutapp.tenky.ui.components.LoadingState
 import fr.dutapp.tenky.ui.components.MessageState
+import fr.dutapp.tenky.ui.formatDataAge
 import fr.dutapp.tenky.ui.formatDayLabel
 import fr.dutapp.tenky.ui.formatTemperature
 import fr.dutapp.tenky.ui.formatTemperatureRange
+import fr.dutapp.tenky.ui.formatPressure
+import fr.dutapp.tenky.ui.formatProbability
 import fr.dutapp.tenky.ui.formatTime
-import fr.dutapp.tenky.ui.formatWindSpeed
+import fr.dutapp.tenky.ui.formatVisibility
+import fr.dutapp.tenky.ui.formatWind
 import fr.dutapp.tenky.ui.messageRes
 import fr.dutapp.tenky.ui.sentenceCase
 import fr.dutapp.tenky.util.WeatherIcons
+import kotlinx.coroutines.delay
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,15 +145,20 @@ fun WeatherScreen(
                 )
             }
 
-            WeatherContent(
-                state = state,
-                contentPadding = padding,
-                onRetry = viewModel::refresh,
-                onRequestPermission = {
-                    permissionLauncher.launch(LocationProvider.LOCATION_PERMISSIONS)
-                },
-                onPickCity = onNavigateToCities,
-            )
+            PullToRefreshBox(
+                isRefreshing = state.isRefreshing,
+                onRefresh = viewModel::refresh,
+                modifier = Modifier.padding(padding),
+            ) {
+                WeatherContent(
+                    state = state,
+                    onRetry = viewModel::refresh,
+                    onRequestPermission = {
+                        permissionLauncher.launch(LocationProvider.LOCATION_PERMISSIONS)
+                    },
+                    onPickCity = onNavigateToCities,
+                )
+            }
         }
     }
 }
@@ -151,15 +166,14 @@ fun WeatherScreen(
 @Composable
 private fun WeatherContent(
     state: WeatherUiState,
-    contentPadding: PaddingValues,
     onRetry: () -> Unit,
     onRequestPermission: () -> Unit,
     onPickCity: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val contentModifier = modifier
-        .fillMaxSize()
-        .padding(contentPadding)
+    // Pull-to-refresh needs its child to be scrollable even when the content
+    // does not fill the screen, so the message states scroll too.
+    val contentModifier = modifier.fillMaxSize()
 
     when {
         state.needsLocationPermission -> MessageState(
@@ -192,7 +206,49 @@ private fun WeatherContent(
             CurrentConditions(current = state.snapshot.current, unit = state.unit)
             HourlyStrip(hourly = state.snapshot.hourly)
             DailyList(daily = state.snapshot.daily)
+            state.fetchedAtMillis?.let { DataAgeLabel(it, isStale = state.isStale) }
         }
+    }
+}
+
+/**
+ * When the shown data was fetched, and whether it is stale.
+ *
+ * Recomputed once a minute so the label does not sit reading "just now" while
+ * the app stays open.
+ */
+@Composable
+private fun DataAgeLabel(
+    fetchedAtMillis: Long,
+    isStale: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(fetchedAtMillis) {
+        while (true) {
+            delay(DATA_AGE_TICK_MILLIS)
+            now = System.currentTimeMillis()
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        if (isStale) {
+            Text(
+                text = stringResource(R.string.offline_showing_cached),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        Text(
+            text = formatDataAge(fetchedAtMillis, now),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -244,8 +300,20 @@ private fun CurrentConditions(
                 )
                 DetailRow(
                     label = stringResource(R.string.title_wind_speed),
-                    value = formatWindSpeed(current.windSpeed, unit),
+                    value = formatWind(current.windSpeed, unit, current.windDirection),
                 )
+                if (current.pressureHpa > 0) {
+                    DetailRow(
+                        label = stringResource(R.string.title_pressure),
+                        value = formatPressure(current.pressureHpa),
+                    )
+                }
+                current.visibilityMetres?.let {
+                    DetailRow(
+                        label = stringResource(R.string.title_visibility),
+                        value = formatVisibility(it),
+                    )
+                }
                 current.sunrise?.let {
                     DetailRow(
                         label = stringResource(R.string.title_sunrise),
@@ -305,6 +373,14 @@ private fun HourlyStrip(hourly: List<HourlyForecast>, modifier: Modifier = Modif
                         text = formatTemperature(entry.temperature),
                         style = MaterialTheme.typography.bodyLarge,
                     )
+                    // Only worth the space once rain is a real possibility.
+                    if (entry.precipitationProbability >= PRECIPITATION_THRESHOLD) {
+                        Text(
+                            text = formatProbability(entry.precipitationProbability),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         }
@@ -334,11 +410,19 @@ private fun DailyList(daily: List<DailyForecast>, modifier: Modifier = Modifier)
                         .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = formatDayLabel(day.date, today, todayLabel, tomorrowLabel),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = formatDayLabel(day.date, today, todayLabel, tomorrowLabel),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        if (day.precipitationProbability >= PRECIPITATION_THRESHOLD) {
+                            Text(
+                                text = formatProbability(day.precipitationProbability),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                     Image(
                         painter = painterResource(WeatherIcons.forCode(day.iconCode)),
                         contentDescription = day.description.sentenceCase(),
@@ -381,3 +465,9 @@ private fun SectionCard(
 /** Keeps the photographic backdrop readable behind text. */
 private const val SCRIM_ALPHA = 0.55f
 private const val CARD_ALPHA = 0.75f
+
+/** Below this, showing a rain chance is noise rather than information. */
+private const val PRECIPITATION_THRESHOLD = 0.1f
+
+/** The age label is minute-resolution, so ticking faster would change nothing. */
+private const val DATA_AGE_TICK_MILLIS = 30_000L

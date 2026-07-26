@@ -8,6 +8,17 @@
     <string name="title_settings">설정</string>
     <string name="action_back">뒤로</string>
     <string name="action_refresh">새로고침</string>
+    <string name="updated_just_now">방금 업데이트됨</string>
+    <plurals name="updated_minutes_ago">
+        <item quantity="other">%1$d분 전 업데이트됨</item>
+    </plurals>
+    <plurals name="updated_hours_ago">
+        <item quantity="other">%1$d시간 전 업데이트됨</item>
+    </plurals>
+    <plurals name="updated_days_ago">
+        <item quantity="other">%1$d일 전 업데이트됨</item>
+    </plurals>
+    <string name="offline_showing_cached">오프라인 — 저장된 데이터 표시 중</string>
 
     <!-- Weather screen -->
     <string name="title_feels_like">체감 온도</string>
@@ -15,6 +26,17 @@
     <string name="title_wind_speed">풍속</string>
     <string name="title_sunrise">일출</string>
     <string name="title_sunset">일몰</string>
+    <string name="title_pressure">기압</string>
+    <string name="title_visibility">가시거리</string>
+    <string name="title_precipitation">강수 확률</string>
+    <string name="wind_direction_n">북</string>
+    <string name="wind_direction_ne">북동</string>
+    <string name="wind_direction_e">동</string>
+    <string name="wind_direction_se">남동</string>
+    <string name="wind_direction_s">남</string>
+    <string name="wind_direction_sw">남서</string>
+    <string name="wind_direction_w">서</string>
+    <string name="wind_direction_nw">북서</string>
     <string name="title_hourly">향후 24시간</string>
     <string name="title_daily">5일 예보</string>
     <string name="label_today">오늘</string>

@@ -1,5 +1,7 @@
 package fr.dutapp.tenky.data
 
+import fr.dutapp.tenky.data.local.CachedWeather
+import fr.dutapp.tenky.data.local.WeatherCache
 import fr.dutapp.tenky.data.remote.OpenWeatherService
 import fr.dutapp.tenky.data.remote.dto.CoordDto
 import fr.dutapp.tenky.data.remote.dto.CurrentWeatherDto
@@ -14,11 +16,13 @@ import fr.dutapp.tenky.domain.model.Coordinates
 import fr.dutapp.tenky.domain.model.DataResult
 import fr.dutapp.tenky.domain.model.TemperatureUnit
 import fr.dutapp.tenky.domain.model.WeatherError
+import fr.dutapp.tenky.domain.model.WeatherSnapshot
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
@@ -109,10 +113,12 @@ class WeatherRepositoryTest {
 
         val result = repository.getWeather(PARIS, TemperatureUnit.METRIC)
 
-        val snapshot = (result as DataResult.Success).data
-        assertEquals("Paris", snapshot.current.placeName)
-        assertEquals(22.0, snapshot.current.temperature, 0.001)
-        assertEquals(1, snapshot.daily.size)
+        val load = (result as DataResult.Success).data
+        assertEquals("Paris", load.snapshot.current.placeName)
+        assertEquals(22.0, load.snapshot.current.temperature, 0.001)
+        assertEquals(1, load.snapshot.daily.size)
+        assertEquals(false, load.isFromCache)
+        assertNull(load.refreshError)
     }
 
     @Test
@@ -135,6 +141,66 @@ class WeatherRepositoryTest {
         repository.getWeather(PARIS, TemperatureUnit.IMPERIAL)
 
         assertEquals("imperial", requestedUnits)
+    }
+
+    @Test
+    fun `a successful fetch is written to the cache`() = runTest {
+        val cache = FakeWeatherCache()
+        val repository = repository(service = FakeService(), cache = cache)
+
+        repository.getWeather(PARIS, TemperatureUnit.METRIC)
+
+        val cached = cache.read(PARIS, TemperatureUnit.METRIC)
+        assertEquals("Paris", cached?.snapshot?.current?.placeName)
+        assertEquals(FIXED_NOW, cached?.fetchedAtMillis)
+    }
+
+    @Test
+    fun `a failed refresh falls back to the cache instead of blanking the screen`() = runTest {
+        val cache = FakeWeatherCache()
+        // Warm the cache with a good response, then go offline.
+        repository(service = FakeService(), cache = cache)
+            .getWeather(PARIS, TemperatureUnit.METRIC)
+
+        val offline = repository(
+            service = failingService(IOException("offline")),
+            cache = cache,
+            nowMillis = FIXED_NOW + 60_000,
+        )
+        val result = offline.getWeather(PARIS, TemperatureUnit.METRIC)
+
+        val load = (result as DataResult.Success).data
+        assertEquals("Paris", load.snapshot.current.placeName)
+        assertEquals(true, load.isFromCache)
+        // The failure is reported alongside the data rather than swallowed.
+        assertEquals(WeatherError.Network, load.refreshError)
+        // The timestamp is the original fetch, not the failed attempt.
+        assertEquals(FIXED_NOW, load.fetchedAtMillis)
+    }
+
+    @Test
+    fun `a failure with nothing cached still surfaces as a failure`() = runTest {
+        val repository = repository(service = failingService(IOException("offline")))
+
+        assertEquals(
+            DataResult.Failure(WeatherError.Network),
+            repository.getWeather(PARIS, TemperatureUnit.METRIC),
+        )
+    }
+
+    @Test
+    fun `the cache does not serve a different unit system`() = runTest {
+        val cache = FakeWeatherCache()
+        repository(service = FakeService(), cache = cache)
+            .getWeather(PARIS, TemperatureUnit.METRIC)
+
+        // Imperial was never fetched, so there is nothing to fall back on.
+        val result = repository(
+            service = failingService(IOException("offline")),
+            cache = cache,
+        ).getWeather(PARIS, TemperatureUnit.IMPERIAL)
+
+        assertEquals(DataResult.Failure(WeatherError.Network), result)
     }
 
     @Test
@@ -163,12 +229,36 @@ class WeatherRepositoryTest {
     private fun repository(
         service: OpenWeatherService,
         apiKey: String = "test-key",
+        cache: WeatherCache = FakeWeatherCache(),
+        nowMillis: Long = FIXED_NOW,
     ) = WeatherRepository(
         service = service,
         apiKeyProvider = { apiKey },
         ioDispatcher = UnconfinedTestDispatcher(),
+        cache = cache,
         localeProvider = { Locale.FRANCE },
+        nowMillis = { nowMillis },
     )
+
+    /** In-memory stand-in for the DataStore-backed cache. */
+    private class FakeWeatherCache : WeatherCache {
+        private val entries = mutableMapOf<String, CachedWeather>()
+
+        override suspend fun read(coordinates: Coordinates, unit: TemperatureUnit) =
+            entries[key(coordinates, unit)]
+
+        override suspend fun write(
+            coordinates: Coordinates,
+            unit: TemperatureUnit,
+            snapshot: WeatherSnapshot,
+            fetchedAtMillis: Long,
+        ) {
+            entries[key(coordinates, unit)] = CachedWeather(snapshot, fetchedAtMillis, unit)
+        }
+
+        private fun key(coordinates: Coordinates, unit: TemperatureUnit) =
+            "${coordinates.latitude},${coordinates.longitude},$unit"
+    }
 
     private fun httpException(code: Int) = HttpException(
         Response.error<Any>(code, "".toResponseBody("application/json".toMediaType())),
@@ -225,6 +315,9 @@ class WeatherRepositoryTest {
     }
 
     private companion object {
+        /** Fixed clock so cache timestamps are assertable. */
+        const val FIXED_NOW = 1_785_024_000_000L
+
         fun currentWeatherDto() = CurrentWeatherDto(
             coord = CoordDto(48.86, 2.34),
             weather = listOf(WeatherDescriptionDto(803, "nuageux", "04d")),

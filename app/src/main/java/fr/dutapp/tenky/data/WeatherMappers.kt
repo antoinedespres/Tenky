@@ -9,6 +9,7 @@ import fr.dutapp.tenky.domain.model.CurrentWeather
 import fr.dutapp.tenky.domain.model.DailyForecast
 import fr.dutapp.tenky.domain.model.HourlyForecast
 import fr.dutapp.tenky.domain.model.SavedCity
+import fr.dutapp.tenky.domain.model.WindDirection
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -43,6 +44,9 @@ fun CurrentWeatherDto.toDomain(): CurrentWeather {
         feelsLike = main.feelsLike,
         humidityPercent = main.humidity,
         windSpeed = wind.speed,
+        windDirection = wind.deg?.let(WindDirection::fromDegrees),
+        pressureHpa = main.pressure,
+        visibilityMetres = visibility,
         description = condition?.description.orEmpty(),
         iconCode = condition?.icon ?: FALLBACK_ICON,
         conditionId = condition?.id ?: 0,
@@ -59,6 +63,7 @@ fun ForecastDto.toHourly(): List<HourlyForecast> {
             time = entry.dt.atZone(offset).toLocalTime(),
             temperature = entry.main.temp,
             iconCode = entry.weather.firstOrNull()?.icon ?: FALLBACK_ICON,
+            precipitationProbability = entry.pop.toFloat(),
         )
     }
 }
@@ -93,6 +98,9 @@ private fun List<ForecastEntryDto>.toDailyForecast(
         dayTemperature = representative?.main?.temp ?: 0.0,
         iconCode = condition?.icon ?: FALLBACK_ICON,
         description = condition?.description.orEmpty(),
+        // The wettest step decides the day: a 70% chance for one afternoon
+        // step matters more to someone planning than the day's average.
+        precipitationProbability = maxOf { it.pop }.toFloat(),
     )
 }
 
