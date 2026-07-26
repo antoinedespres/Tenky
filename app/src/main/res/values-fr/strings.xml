@@ -84,4 +84,7 @@
     <string name="error_unknown">Une erreur est survenue.</string>
     <string name="action_retry">Réessayer</string>
     <string name="title_trend">Tendance sur 5 jours</string>
+    <string name="action_reorder_city">Réordonner la ville</string>
+    <string name="action_undo">Annuler</string>
+    <string name="city_removed">%1$s supprimée</string>
 </resources>

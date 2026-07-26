@@ -99,4 +99,7 @@
     <string name="error_unknown">Something went wrong.</string>
     <string name="action_retry">Retry</string>
     <string name="title_trend">5-day trend</string>
+    <string name="action_reorder_city">Reorder city</string>
+    <string name="action_undo">Undo</string>
+    <string name="city_removed">%1$s removed</string>
 </resources>

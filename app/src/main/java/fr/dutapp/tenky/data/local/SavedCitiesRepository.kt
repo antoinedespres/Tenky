@@ -39,6 +39,23 @@ class SavedCitiesRepository(
         current.filterNot { it.isSamePlaceAs(city) }
     }
 
+    /** Puts a removed city back where it was, for undo. */
+    suspend fun insert(index: Int, city: SavedCity) = update { current ->
+        if (current.any { it.isSamePlaceAs(city) }) {
+            current
+        } else {
+            current.toMutableList().apply { add(index.coerceIn(0, size), city) }
+        }
+    }
+
+    /**
+     * Persists a new order.
+     *
+     * Written once when a drag ends rather than on every swap, which would put
+     * a DataStore write behind each frame of the gesture.
+     */
+    suspend fun replaceAll(cities: List<SavedCity>) = update { cities }
+
     suspend fun clear() = update { emptyList() }
 
     private suspend fun update(transform: (List<SavedCity>) -> List<SavedCity>) {

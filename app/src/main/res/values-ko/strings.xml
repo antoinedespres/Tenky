@@ -81,4 +81,7 @@
     <string name="error_unknown">문제가 발생했습니다.</string>
     <string name="action_retry">다시 시도</string>
     <string name="title_trend">5일 추이</string>
+    <string name="action_reorder_city">도시 순서 변경</string>
+    <string name="action_undo">실행 취소</string>
+    <string name="city_removed">%1$s 삭제됨</string>
 </resources>
