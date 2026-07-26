@@ -2,6 +2,7 @@ package fr.dutapp.tenky.domain.model
 
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 
@@ -100,12 +101,26 @@ data class DailyForecast(
     val precipitationProbability: Float = 0f,
 )
 
+/**
+ * One point of the temperature trend.
+ *
+ * Carries the full date, unlike [HourlyForecast], because the chart marks where
+ * one day ends and the next begins.
+ */
+@Serializable
+data class TemperaturePoint(
+    @Serializable(with = LocalDateTimeSerializer::class) val dateTime: LocalDateTime,
+    val temperature: Double,
+)
+
 /** Everything the weather screen renders, for a single place. */
 @Serializable
 data class WeatherSnapshot(
     val current: CurrentWeather,
     val hourly: List<HourlyForecast>,
     val daily: List<DailyForecast>,
+    /** Every three-hour step across the five days, for the trend chart. */
+    val trend: List<TemperaturePoint> = emptyList(),
     /** Offset of the place from UTC, used to render its local times. */
     @Serializable(with = ZoneOffsetSerializer::class) val zoneOffset: ZoneOffset,
 )

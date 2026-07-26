@@ -83,4 +83,5 @@
     <string name="error_not_found">Aucune donnée météo pour ce lieu.</string>
     <string name="error_unknown">Une erreur est survenue.</string>
     <string name="action_retry">Réessayer</string>
+    <string name="title_trend">Tendance sur 5 jours</string>
 </resources>

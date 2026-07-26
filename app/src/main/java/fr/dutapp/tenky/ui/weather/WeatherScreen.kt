@@ -59,6 +59,7 @@ import fr.dutapp.tenky.location.LocationProvider
 import fr.dutapp.tenky.ui.components.ErrorState
 import fr.dutapp.tenky.ui.components.LoadingState
 import fr.dutapp.tenky.ui.components.MessageState
+import fr.dutapp.tenky.ui.components.TemperatureChart
 import fr.dutapp.tenky.ui.formatDataAge
 import fr.dutapp.tenky.ui.formatDayLabel
 import fr.dutapp.tenky.ui.formatTemperature
@@ -205,6 +206,11 @@ private fun WeatherContent(
         ) {
             CurrentConditions(current = state.snapshot.current, unit = state.unit)
             HourlyStrip(hourly = state.snapshot.hourly)
+            if (state.snapshot.trend.isNotEmpty()) {
+                SectionCard(title = stringResource(R.string.title_trend)) {
+                    TemperatureChart(points = state.snapshot.trend)
+                }
+            }
             DailyList(daily = state.snapshot.daily)
             state.fetchedAtMillis?.let { DataAgeLabel(it, isStale = state.isStale) }
         }

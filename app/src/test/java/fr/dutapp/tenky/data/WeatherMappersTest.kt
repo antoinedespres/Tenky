@@ -141,6 +141,30 @@ class WeatherMappersTest {
     }
 
     @Test
+    fun `the trend keeps every step, unlike the 24-hour strip`() {
+        val forecast = forecastDto(entryCount = 16)
+
+        val trend = forecast.toTrend()
+
+        assertEquals(16, trend.size)
+        assertEquals(HOURLY_STEP_COUNT, forecast.toHourly().size)
+    }
+
+    @Test
+    fun `trend points carry the local date so day boundaries can be drawn`() {
+        val forecast = forecastDto(entryCount = 16)
+
+        val dates = forecast.toTrend().map { it.dateTime.toLocalDate() }.distinct()
+
+        assertEquals(
+            listOf(LocalDate.of(2026, 7, 26), LocalDate.of(2026, 7, 27)),
+            dates,
+        )
+        // 02:00 local, not 00:00 UTC — the offset is applied.
+        assertEquals(LocalTime.of(2, 0), forecast.toTrend().first().dateTime.toLocalTime())
+    }
+
+    @Test
     fun `daily is empty when the forecast carries no entries`() {
         val forecast = ForecastDto(city = forecastCity(), list = emptyList())
 

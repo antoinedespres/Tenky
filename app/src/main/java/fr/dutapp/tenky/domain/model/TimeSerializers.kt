@@ -7,6 +7,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneOffset
 
@@ -37,6 +38,19 @@ internal object LocalDateSerializer : KSerializer<LocalDate> {
 
     override fun deserialize(decoder: Decoder): LocalDate =
         LocalDate.ofEpochDay(decoder.decodeLong())
+}
+
+internal object LocalDateTimeSerializer : KSerializer<LocalDateTime> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("LocalDateTime", PrimitiveKind.LONG)
+
+    // Stored against UTC purely as an encoding: the value is already local to
+    // the place being shown, and no offset is reapplied on the way back.
+    override fun serialize(encoder: Encoder, value: LocalDateTime) =
+        encoder.encodeLong(value.toEpochSecond(ZoneOffset.UTC))
+
+    override fun deserialize(decoder: Decoder): LocalDateTime =
+        LocalDateTime.ofEpochSecond(decoder.decodeLong(), 0, ZoneOffset.UTC)
 }
 
 internal object ZoneOffsetSerializer : KSerializer<ZoneOffset> {
