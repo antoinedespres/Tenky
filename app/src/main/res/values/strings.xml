@@ -38,10 +38,21 @@
     <string name="action_close">Close</string>
 
     <!-- Settings screen -->
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System default</string>
+    <!--
+      Language names stay in their own language so a speaker can find theirs
+      whatever the app is currently showing.
+    -->
+    <string name="settings_language_english" translatable="false">English</string>
+    <string name="settings_language_french" translatable="false">Français</string>
+    <string name="settings_language_korean" translatable="false">한국어</string>
     <string name="settings_temperature_unit">Imperial units</string>
     <string name="settings_temperature_unit_desc">Use °F and mph instead of °C and m/s</string>
     <string name="title_credits">Credits</string>
-    <string name="title_credits_description">SVG icon pack by Those Icons on flaticon.com</string>
+    <string name="title_credits_description">Weather icon pack by Those Icons on flaticon.com</string>
+    <string name="credits_url" translatable="false">https://www.flaticon.com/packs/weather-76</string>
+    <string name="action_open_link">Open link</string>
 
     <!-- Location -->
     <string name="location_permission_title">Location needed</string>

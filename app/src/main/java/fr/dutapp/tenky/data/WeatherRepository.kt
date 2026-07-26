@@ -7,6 +7,7 @@ import fr.dutapp.tenky.domain.model.SavedCity
 import fr.dutapp.tenky.domain.model.TemperatureUnit
 import fr.dutapp.tenky.domain.model.WeatherError
 import fr.dutapp.tenky.domain.model.WeatherSnapshot
+import fr.dutapp.tenky.domain.model.toOpenWeatherLanguage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -42,7 +43,7 @@ class WeatherRepository(
         unit: TemperatureUnit,
     ): DataResult<WeatherSnapshot> = safeCall {
         coroutineScope {
-            val language = localeProvider().language
+            val language = localeProvider().toOpenWeatherLanguage()
             val currentDeferred = async {
                 service.getCurrentWeather(
                     latitude = coordinates.latitude,
@@ -81,7 +82,7 @@ class WeatherRepository(
             latitude = coordinates.latitude,
             longitude = coordinates.longitude,
             units = unit.apiValue,
-            language = localeProvider().language,
+            language = localeProvider().toOpenWeatherLanguage(),
         ).toDomain()
     }
 

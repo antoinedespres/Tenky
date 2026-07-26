@@ -17,6 +17,7 @@ import fr.dutapp.tenky.domain.model.WeatherError
 import fr.dutapp.tenky.domain.model.WeatherSnapshot
 import fr.dutapp.tenky.location.LocationProvider
 import fr.dutapp.tenky.location.LocationResult
+import fr.dutapp.tenky.ui.settings.AppLanguageController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,14 +52,18 @@ class WeatherViewModel(
     val uiState: StateFlow<WeatherUiState> = _uiState.asStateFlow()
 
     init {
-        // Reloads whenever the chosen place or the unit system changes.
+        // Reloads whenever the chosen place, the unit system or the language
+        // changes. Language matters because the condition text ("Overcast
+        // clouds") is written by the API, not by a string resource, so
+        // switching languages has to refetch rather than just recompose.
         viewModelScope.launch {
             combine(
                 selectedPlaceRepository.selectedCity,
                 settingsRepository.temperatureUnit,
-            ) { city, unit -> city to unit }
+                AppLanguageController.language,
+            ) { city, unit, language -> Triple(city, unit, language) }
                 .distinctUntilChanged()
-                .collect { (city, unit) ->
+                .collect { (city, unit, _) ->
                     _uiState.update { it.copy(selectedCity = city, unit = unit) }
                     load(city, unit, isRefresh = false)
                 }

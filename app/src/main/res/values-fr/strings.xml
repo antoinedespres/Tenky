@@ -36,10 +36,13 @@
     <string name="action_close">Fermer</string>
 
     <!-- Settings screen -->
+    <string name="settings_language">Langue</string>
+    <string name="settings_language_system">Paramètre du système</string>
     <string name="settings_temperature_unit">Unités impériales</string>
     <string name="settings_temperature_unit_desc">Utiliser °F et mph au lieu de °C et m/s</string>
     <string name="title_credits">Crédits</string>
-    <string name="title_credits_description">Pack d\'icônes de Those Icons sur flaticon.com</string>
+    <string name="title_credits_description">Pack d\'icônes météo de Those Icons sur flaticon.com</string>
+    <string name="action_open_link">Ouvrir le lien</string>
 
     <!-- Location -->
     <string name="location_permission_title">Localisation requise</string>
