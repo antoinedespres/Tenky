@@ -87,4 +87,6 @@
     <string name="action_reorder_city">Réordonner la ville</string>
     <string name="action_undo">Annuler</string>
     <string name="city_removed">%1$s supprimée</string>
+    <string name="widget_description">Conditions actuelles pour la ville choisie</string>
+    <string name="widget_no_data">Ouvrez Tenky pour choisir une ville</string>
 </resources>
