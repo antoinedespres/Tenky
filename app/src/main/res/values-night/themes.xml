@@ -1,5 +1,0 @@
-<resources>
-    <style name="Theme.Tenky.Main" parent="android:Theme.Material.NoActionBar">
-        <item name="android:windowBackground">@color/night_surface</item>
-    </style>
-</resources>

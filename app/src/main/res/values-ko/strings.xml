@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Tenky</string>
+
+    <!-- Navigation -->
+    <string name="title_main">날씨</string>
+    <string name="title_all_cities">도시 목록</string>
+    <string name="title_settings">설정</string>
+    <string name="action_back">뒤로</string>
+    <string name="action_refresh">새로고침</string>
+
+    <!-- Weather screen -->
+    <string name="title_feels_like">체감 온도</string>
+    <string name="title_humidity">습도</string>
+    <string name="title_wind_speed">풍속</string>
+    <string name="title_sunrise">일출</string>
+    <string name="title_sunset">일몰</string>
+    <string name="title_hourly">향후 24시간</string>
+    <string name="title_daily">5일 예보</string>
+    <string name="label_today">오늘</string>
+    <string name="label_tomorrow">내일</string>
+    <string name="bg_description">현재 날씨에 해당하는 배경</string>
+    <string name="weather_icon_description">날씨 아이콘</string>
+    <string name="wind_speed_metric">%1$d m/s</string>
+    <string name="wind_speed_imperial">%1$d mph</string>
+
+    <!-- Cities screen -->
+    <string name="cities_empty_title">저장된 도시가 없습니다</string>
+    <string name="cities_empty_body">도시를 검색하여 목록에 추가하세요.</string>
+    <string name="cities_search_hint">도시 검색</string>
+    <string name="cities_search_empty">일치하는 도시가 없습니다.</string>
+    <string name="action_add_city">도시 추가</string>
+    <string name="action_remove_city">%1$s 삭제</string>
+    <string name="action_clear_all">모두 지우기</string>
+    <string name="action_search">검색</string>
+    <string name="action_close">닫기</string>
+
+    <!-- Settings screen -->
+    <string name="settings_language">언어</string>
+    <string name="settings_language_system">시스템 기본값</string>
+    <string name="settings_temperature_unit">야드파운드법 단위</string>
+    <string name="settings_temperature_unit_desc">°C와 m/s 대신 °F와 mph를 사용합니다</string>
+    <string name="title_credits">크레딧</string>
+    <string name="title_credits_description">flaticon.com의 Those Icons 날씨 아이콘 팩</string>
+    <string name="action_open_link">링크 열기</string>
+
+    <!-- Location -->
+    <string name="location_permission_title">위치 권한 필요</string>
+    <string name="location_permission_body">Tenky는 현재 위치의 날씨를 표시하기 위해 위치 정보를 사용합니다. 대신 도시를 선택할 수도 있습니다.</string>
+    <string name="location_permission_action">권한 허용</string>
+    <string name="location_unavailable">위치를 확인할 수 없습니다. 대신 도시를 선택해 보세요.</string>
+
+    <!-- Errors -->
+    <string name="error_missing_api_key">OpenWeather API 키가 설정되지 않았습니다. local.properties에 OPENWEATHER_API_KEY를 추가한 후 다시 빌드하세요.</string>
+    <string name="error_invalid_api_key">OpenWeather API 키가 거부되었습니다. 새 키는 활성화되기까지 몇 분이 걸릴 수 있습니다.</string>
+    <string name="error_network">인터넷에 연결되어 있지 않습니다.</string>
+    <string name="error_rate_limited">요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.</string>
+    <string name="error_not_found">이 지역의 날씨 데이터가 없습니다.</string>
+    <string name="error_unknown">문제가 발생했습니다.</string>
+    <string name="action_retry">다시 시도</string>
+</resources>

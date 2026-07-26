@@ -67,6 +67,13 @@ android {
         buildConfig = true
     }
 
+    androidResources {
+        // Only package the languages the app actually translates, so AppCompat
+        // does not drag in its ~80 other locales. Must stay in step with
+        // res/xml/locales_config.xml and the AppLanguage enum.
+        localeFilters += listOf("en", "fr", "ko")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -86,6 +93,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
 

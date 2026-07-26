@@ -12,6 +12,7 @@ import fr.dutapp.tenky.data.remote.ApiKeyInterceptor
 import fr.dutapp.tenky.data.remote.OpenWeatherService
 import fr.dutapp.tenky.data.remote.installNetworkLogging
 import fr.dutapp.tenky.location.LocationProvider
+import fr.dutapp.tenky.ui.settings.AppLanguageController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -55,6 +56,9 @@ class AppContainer(context: Context) {
         service = service,
         apiKeyProvider = { BuildConfig.OPENWEATHER_API_KEY },
         ioDispatcher = Dispatchers.IO,
+        // Weather descriptions come back in the language the user picked in
+        // Settings, not just the device language.
+        localeProvider = { AppLanguageController.currentLocale },
     )
 
     val settingsRepository = SettingsRepository(appContext.dataStore)

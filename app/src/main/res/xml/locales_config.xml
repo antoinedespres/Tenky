@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares the languages the app ships, so Android 13 and later can offer the
+  per-app language picker under Settings → Apps → Tenky → Language.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="fr" />
+    <locale android:name="ko" />
+</locale-config>
