@@ -11,4 +11,5 @@
 
     <!-- Overridden in values-night so the window matches the Compose theme. -->
     <color name="window_background">@color/azure_x_web_color</color>
+    <color name="splash_background">@color/celadon_blue</color>
 </resources>
