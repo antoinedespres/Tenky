@@ -6,6 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import fr.dutapp.tenky.ui.TenkyNavHost
+import fr.dutapp.tenky.ui.settings.AppLanguageController
 import fr.dutapp.tenky.ui.theme.TenkyTheme
 
 /**
@@ -25,6 +26,10 @@ class MainActivity : AppCompatActivity() {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // Before setContent, so the first composition already sees the right
+        // language and the weather is fetched once rather than twice.
+        AppLanguageController.sync()
 
         setContent {
             TenkyTheme {

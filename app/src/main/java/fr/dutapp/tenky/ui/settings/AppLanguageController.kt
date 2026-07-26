@@ -1,5 +1,6 @@
 package fr.dutapp.tenky.ui.settings
 
+import android.content.res.Resources
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import fr.dutapp.tenky.domain.model.AppLanguage
@@ -33,10 +34,21 @@ object AppLanguageController {
     /**
      * The locale used for API requests and date formatting.
      *
-     * Falls back to the device default while the app follows the system.
+     * Derived from [language] rather than read back from `AppCompatDelegate`.
+     * [apply] publishes the new value before asking the delegate to switch, so
+     * a collector reacting to that emission would otherwise query the delegate
+     * while it still reports the previous locale — and refetch the weather in
+     * the language the user just moved away from.
+     *
+     * For [AppLanguage.SYSTEM] this reads the device configuration rather than
+     * `Locale.getDefault()`, which reflects any app-level override still in
+     * effect at that moment.
      */
     val currentLocale: Locale
-        get() = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+        get() = when (val language = _language.value) {
+            AppLanguage.SYSTEM -> Resources.getSystem().configuration.locales[0]
+            else -> Locale.forLanguageTag(language.languageTag)
+        }
 
     /** Applies [language]; AppCompat then recreates the running activities. */
     fun apply(language: AppLanguage) {
@@ -51,6 +63,18 @@ object AppLanguageController {
                 LocaleListCompat.forLanguageTags(language.languageTag)
             },
         )
+    }
+
+    /**
+     * Re-reads the locale AppCompat restored from storage.
+     *
+     * Below Android 13 AppCompat only applies the stored locale when an
+     * Activity is attached, which is after `Application.onCreate` — where this
+     * object is first touched. Without this the app could start showing Korean
+     * while believing it was following the system.
+     */
+    fun sync() {
+        _language.value = readCurrent()
     }
 
     private fun readCurrent(): AppLanguage = AppLanguage.fromLanguageTag(
