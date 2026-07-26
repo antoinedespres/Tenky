@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Slowly turning sun rays.
+
+  Only Android 12+ plays this: below that, androidx.core.splashscreen draws the
+  splash as a window background, which cannot animate, so the first frame is
+  shown instead. That frame is identical to the static ic_splash_icon, so the
+  older path still looks finished rather than half-drawn.
+
+  45 degrees is one eighth of a turn — with eight evenly spaced rays the end
+  state matches the start, so the rotation reads as continuous.
+-->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_splash_icon">
+
+    <target android:name="rays">
+        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt"
+            name="android:animation">
+            <objectAnimator
+                android:propertyName="rotation"
+                android:valueFrom="0"
+                android:valueTo="45"
+                android:duration="1200"
+                android:interpolator="@android:interpolator/linear" />
+        </aapt:attr>
+    </target>
+</animated-vector>

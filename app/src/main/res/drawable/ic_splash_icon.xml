@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Splash mark: sun behind a cloud, echoing the launcher icon but simplified so
+  it stays legible at splash size.
+
+  The canvas is 288dp with all artwork inside the central 192dp circle, which
+  is what Android 12+ masks the splash icon to. Drawing order matters — the
+  rays and disc are painted first so the cloud occludes them.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+
+    <!-- Pivot is the sun's centre, so the animated variant can rotate this. -->
+    <group
+        android:name="rays"
+        android:pivotX="170"
+        android:pivotY="126">
+        <path
+            android:pathData="M204,126 L216,126"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M194,150 L202.5,158.5"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M170,160 L170,172"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M146,150 L137.5,158.5"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M136,126 L124,126"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M146,102 L137.5,93.5"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M170,92 L170,80"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M194,102 L202.5,93.5"
+            android:strokeColor="#FFCA28"
+            android:strokeWidth="11"
+            android:strokeLineCap="round" />
+    </group>
+
+    <!-- Sun disc, centred on (170,126) with radius 26. -->
+    <path
+        android:fillColor="#FFCA28"
+        android:pathData="M144,126 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0 Z" />
+
+    <!-- Cloud: three overlapping discs sharing a flat base at y=200. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,158 a36,36 0 1,0 72,0 a36,36 0 1,0 -72,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M78,174 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M142,172 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M104,172 H170 V200 H104 Z" />
+</vector>
