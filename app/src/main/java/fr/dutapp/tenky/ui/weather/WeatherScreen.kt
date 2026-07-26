@@ -9,16 +9,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -38,10 +44,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -91,13 +99,31 @@ fun WeatherScreen(
         viewModel.onLocationPermissionResult(granted.values.any { it })
     }
 
+    val pagerState = rememberPagerState(pageCount = { state.places.size })
+
+    // Report the settled page rather than every frame of the swipe, so a page
+    // is not loaded just because the user scrolled past it.
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect(viewModel::onPageChanged)
+    }
+
+    // Picking a city on the cities screen scrolls the pager to it.
+    LaunchedEffect(state.scrollToPage) {
+        val target = state.scrollToPage ?: return@LaunchedEffect
+        if (target != pagerState.currentPage) pagerState.animateScrollToPage(target)
+        viewModel.onScrollHandled()
+    }
+
+    val currentPage = state.pageState(pagerState.currentPage)
+
     Scaffold(
         modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = state.snapshot?.current?.placeName
+                        text = currentPage.snapshot?.current?.placeName
+                            ?: state.places.getOrNull(pagerState.currentPage)?.city?.name
                             ?: stringResource(R.string.title_main),
                     )
                 },
@@ -129,8 +155,8 @@ fun WeatherScreen(
         containerColor = Color.Transparent,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            state.snapshot?.let { snapshot ->
-                // Backdrop matching the current condition, behind the content.
+            // Backdrop follows the visible page, behind the pager.
+            currentPage.snapshot?.let { snapshot ->
                 Image(
                     painter = painterResource(
                         WeatherIcons.backgroundFor(snapshot.current.conditionId),
@@ -146,18 +172,85 @@ fun WeatherScreen(
                 )
             }
 
-            PullToRefreshBox(
-                isRefreshing = state.isRefreshing,
-                onRefresh = viewModel::refresh,
-                modifier = Modifier.padding(padding),
+            // Insets are applied once, around both, so the page dots clear the
+            // navigation bar instead of sitting behind it.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
             ) {
-                WeatherContent(
-                    state = state,
-                    onRetry = viewModel::refresh,
-                    onRequestPermission = {
-                        permissionLauncher.launch(LocationProvider.LOCATION_PERMISSIONS)
-                    },
-                    onPickCity = onNavigateToCities,
+                HorizontalPager(
+                    state = pagerState,
+                    key = { index -> state.places.getOrNull(index)?.key ?: index.toString() },
+                ) { page ->
+                    val pageState = state.pageState(page)
+                    PullToRefreshBox(
+                        isRefreshing = pageState.isRefreshing,
+                        onRefresh = viewModel::refresh,
+                    ) {
+                        WeatherContent(
+                            state = pageState,
+                            unit = state.unit,
+                            onRetry = viewModel::refresh,
+                            onRequestPermission = {
+                                permissionLauncher.launch(LocationProvider.LOCATION_PERMISSIONS)
+                            },
+                            onPickCity = onNavigateToCities,
+                        )
+                    }
+                }
+
+                if (state.places.size > 1) {
+                    PageIndicator(
+                        pageCount = state.places.size,
+                        currentPage = pagerState.currentPage,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 8.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Dots showing which saved place is on screen.
+ *
+ * The first dot is the device location, so it gets its own icon rather than
+ * being indistinguishable from the cities that follow it.
+ */
+@Composable
+private fun PageIndicator(
+    pageCount: Int,
+    currentPage: Int,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        repeat(pageCount) { index ->
+            val selected = index == currentPage
+            val color = if (selected) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = INDICATOR_ALPHA)
+            }
+            if (index == 0) {
+                Icon(
+                    imageVector = Icons.Default.MyLocation,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(10.dp),
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(color),
                 )
             }
         }
@@ -166,7 +259,8 @@ fun WeatherScreen(
 
 @Composable
 private fun WeatherContent(
-    state: WeatherUiState,
+    state: PageState,
+    unit: TemperatureUnit,
     onRetry: () -> Unit,
     onRequestPermission: () -> Unit,
     onPickCity: () -> Unit,
@@ -204,7 +298,7 @@ private fun WeatherContent(
             modifier = contentModifier.verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            CurrentConditions(current = state.snapshot.current, unit = state.unit)
+            CurrentConditions(current = state.snapshot.current, unit = unit)
             HourlyStrip(hourly = state.snapshot.hourly)
             if (state.snapshot.trend.isNotEmpty()) {
                 SectionCard(title = stringResource(R.string.title_trend)) {
@@ -213,6 +307,9 @@ private fun WeatherContent(
             }
             DailyList(daily = state.snapshot.daily)
             state.fetchedAtMillis?.let { DataAgeLabel(it, isStale = state.isStale) }
+            // Clearance so the page dots, which float above the pager, never
+            // come to rest on top of the last card.
+            Spacer(Modifier.height(INDICATOR_CLEARANCE))
         }
     }
 }
@@ -477,3 +574,7 @@ private const val PRECIPITATION_THRESHOLD = 0.1f
 
 /** The age label is minute-resolution, so ticking faster would change nothing. */
 private const val DATA_AGE_TICK_MILLIS = 30_000L
+
+/** Unselected page dots recede rather than competing with the content. */
+private const val INDICATOR_ALPHA = 0.4f
+private val INDICATOR_CLEARANCE = 32.dp
