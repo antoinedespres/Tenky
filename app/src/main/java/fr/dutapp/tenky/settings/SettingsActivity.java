@@ -41,16 +41,12 @@ public class SettingsActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-
-        switch(id) {
-            case R.id.navigation_all_cities:
-                startActivity(new Intent(this, AllCitiesActivity.class));
-                finish();
-                break;
-            case R.id.navigation_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                finish();
-                break;
+        if (id == R.id.navigation_all_cities) {
+            startActivity(new Intent(this, AllCitiesActivity.class));
+            finish();
+        } else if (id == R.id.navigation_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            finish();
         }
 
         return super.onOptionsItemSelected(item);

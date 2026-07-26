@@ -268,14 +268,11 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        switch (id) {
-            case R.id.navigation_all_cities:
-                Intent intent = new Intent(this, AllCitiesActivity.class);
-                startActivityForResult(intent, ALL_CITIES_ACTIVITY_REQUEST_CODE);
-                break;
-            case R.id.navigation_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
+        if (id == R.id.navigation_all_cities) {
+            Intent intent = new Intent(this, AllCitiesActivity.class);
+            startActivityForResult(intent, ALL_CITIES_ACTIVITY_REQUEST_CODE);
+        } else if (id == R.id.navigation_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
         }
 
         return super.onOptionsItemSelected(item);
