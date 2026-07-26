@@ -162,12 +162,29 @@ class WeatherViewModel(
         viewModelScope.launch { load(WeatherPlace.DeviceLocation, state.unit, isRefresh = false) }
     }
 
+    /**
+     * Keys with a load in flight.
+     *
+     * The page's own `isLoading` cannot serve this: it defaults to true before
+     * anything has started, so guarding on it would block the first load. Left
+     * unguarded, the initial emission and the pager settling both started a
+     * load for the same place — which on the device page meant two concurrent
+     * location requests, each holding its own listeners.
+     */
+    private val inFlight = mutableSetOf<String>()
+
     private fun ensureLoaded(index: Int) {
         val state = _uiState.value
         val place = state.places.getOrNull(index) ?: return
-        // Already loaded, or a load is in flight for this place.
-        if (state.pages[place.key]?.let { it.snapshot != null || it.isRefreshing } == true) return
-        viewModelScope.launch { load(place, state.unit, isRefresh = false) }
+        if (state.pages[place.key]?.snapshot != null) return
+        if (!inFlight.add(place.key)) return
+        viewModelScope.launch {
+            try {
+                load(place, state.unit, isRefresh = false)
+            } finally {
+                inFlight.remove(place.key)
+            }
+        }
     }
 
     private suspend fun load(place: WeatherPlace, unit: TemperatureUnit, isRefresh: Boolean) {
