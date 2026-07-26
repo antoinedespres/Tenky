@@ -2,10 +2,12 @@ package fr.dutapp.tenky.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import fr.dutapp.tenky.R
 import fr.dutapp.tenky.domain.model.TemperatureUnit
 import fr.dutapp.tenky.domain.model.WeatherError
+import fr.dutapp.tenky.domain.model.WindDirection
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -48,6 +50,90 @@ fun formatWindSpeed(value: Double, unit: TemperatureUnit): String = stringResour
     },
     value.roundToInt(),
 )
+
+/** Wind speed followed by the compass sector it blows from, when known. */
+@Composable
+fun formatWind(
+    speed: Double,
+    unit: TemperatureUnit,
+    direction: WindDirection?,
+): String {
+    val value = formatWindSpeed(speed, unit)
+    return if (direction == null) {
+        value
+    } else {
+        stringResource(R.string.wind_with_direction, value, stringResource(direction.labelRes()))
+    }
+}
+
+@StringRes
+private fun WindDirection.labelRes(): Int = when (this) {
+    WindDirection.NORTH -> R.string.wind_direction_n
+    WindDirection.NORTH_EAST -> R.string.wind_direction_ne
+    WindDirection.EAST -> R.string.wind_direction_e
+    WindDirection.SOUTH_EAST -> R.string.wind_direction_se
+    WindDirection.SOUTH -> R.string.wind_direction_s
+    WindDirection.SOUTH_WEST -> R.string.wind_direction_sw
+    WindDirection.WEST -> R.string.wind_direction_w
+    WindDirection.NORTH_WEST -> R.string.wind_direction_nw
+}
+
+@Composable
+fun formatPressure(hectopascals: Int): String =
+    stringResource(R.string.pressure_value, hectopascals)
+
+/**
+ * Visibility in kilometres once past 1 km, metres below that.
+ *
+ * The API caps this at 10 km, so "10 km" means "10 or more".
+ */
+@Composable
+fun formatVisibility(metres: Int): String = if (metres >= METRES_PER_KILOMETRE) {
+    val kilometres = metres.toDouble() / METRES_PER_KILOMETRE
+    stringResource(
+        R.string.visibility_kilometres,
+        String.format(Locale.getDefault(), if (kilometres % 1.0 == 0.0) "%.0f" else "%.1f", kilometres),
+    )
+} else {
+    stringResource(R.string.visibility_metres, metres)
+}
+
+/** Probability given as 0..1, shown as a whole percentage. */
+@Composable
+fun formatProbability(probability: Float): String =
+    stringResource(R.string.percent_value, (probability * 100).roundToInt())
+
+private const val METRES_PER_KILOMETRE = 1000
+
+/**
+ * "Updated 5 minutes ago", coarsened to the largest sensible unit.
+ *
+ * Anything under a minute reads as "just now" rather than counting seconds,
+ * which would only draw attention to a number nobody acts on.
+ */
+@Composable
+fun formatDataAge(fetchedAtMillis: Long, nowMillis: Long): String {
+    val elapsed = (nowMillis - fetchedAtMillis).coerceAtLeast(0)
+    val minutes = elapsed / MILLIS_PER_MINUTE
+    val hours = minutes / MINUTES_PER_HOUR
+    val days = hours / HOURS_PER_DAY
+
+    return when {
+        minutes < 1 -> stringResource(R.string.updated_just_now)
+        hours < 1 -> pluralStringResource(
+            R.plurals.updated_minutes_ago,
+            minutes.toInt(),
+            minutes.toInt(),
+        )
+
+        days < 1 -> pluralStringResource(R.plurals.updated_hours_ago, hours.toInt(), hours.toInt())
+        else -> pluralStringResource(R.plurals.updated_days_ago, days.toInt(), days.toInt())
+    }
+}
+
+private const val MILLIS_PER_MINUTE = 60_000L
+private const val MINUTES_PER_HOUR = 60L
+private const val HOURS_PER_DAY = 24L
 
 private val timeFormatter: DateTimeFormatter =
     DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)

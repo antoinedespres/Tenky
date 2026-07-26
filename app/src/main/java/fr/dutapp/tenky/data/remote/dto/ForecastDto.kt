@@ -18,6 +18,9 @@ data class ForecastEntryDto(
     val main: MainDto,
     val weather: List<WeatherDescriptionDto> = emptyList(),
     val wind: WindDto = WindDto(),
+    /** Probability of precipitation, 0..1. */
+    val pop: Double = 0.0,
+    val visibility: Int? = null,
 )
 
 @Serializable

@@ -33,6 +33,10 @@ data class WeatherUiState(
     val snapshot: WeatherSnapshot? = null,
     val unit: TemperatureUnit = TemperatureUnit.METRIC,
     val error: WeatherError? = null,
+    /** When [snapshot] was fetched, for the "updated N minutes ago" label. */
+    val fetchedAtMillis: Long? = null,
+    /** True when the shown data came from the cache after a failed refresh. */
+    val isStale: Boolean = false,
     /** Set when location is needed but not granted, so the UI can prompt. */
     val needsLocationPermission: Boolean = false,
     /** Set when permission was granted but no fix could be obtained. */
@@ -127,7 +131,16 @@ class WeatherViewModel(
     private suspend fun fetch(coordinates: Coordinates, unit: TemperatureUnit) {
         when (val result = weatherRepository.getWeather(coordinates, unit)) {
             is DataResult.Success -> _uiState.update {
-                it.copy(isLoading = false, isRefreshing = false, snapshot = result.data, error = null)
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                    snapshot = result.data.snapshot,
+                    fetchedAtMillis = result.data.fetchedAtMillis,
+                    isStale = result.data.isFromCache,
+                    // Carries the reason the refresh failed, so cached data can
+                    // be shown with an explanation rather than silently.
+                    error = result.data.refreshError,
+                )
             }
 
             is DataResult.Failure -> _uiState.update {

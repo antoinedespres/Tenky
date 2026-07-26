@@ -8,6 +8,8 @@ import fr.dutapp.tenky.data.WeatherRepository
 import fr.dutapp.tenky.data.local.SavedCitiesRepository
 import fr.dutapp.tenky.data.local.SelectedPlaceRepository
 import fr.dutapp.tenky.data.local.SettingsRepository
+import fr.dutapp.tenky.data.local.DataStoreWeatherCache
+import fr.dutapp.tenky.data.local.WeatherCache
 import fr.dutapp.tenky.data.remote.ApiKeyInterceptor
 import fr.dutapp.tenky.data.remote.OpenWeatherService
 import fr.dutapp.tenky.data.remote.installNetworkLogging
@@ -52,10 +54,13 @@ class AppContainer(context: Context) {
         .build()
         .create(OpenWeatherService::class.java)
 
+    val weatherCache: WeatherCache = DataStoreWeatherCache(appContext.dataStore, json)
+
     val weatherRepository = WeatherRepository(
         service = service,
         apiKeyProvider = { BuildConfig.OPENWEATHER_API_KEY },
         ioDispatcher = Dispatchers.IO,
+        cache = weatherCache,
         // Weather descriptions come back in the language the user picked in
         // Settings, not just the device language.
         localeProvider = { AppLanguageController.currentLocale },
