@@ -1,0 +1,10 @@
+# Copy this file to `local.properties` and fill in your own values.
+# `local.properties` is git-ignored and must never be committed.
+
+# Path to your Android SDK (Android Studio usually writes this for you).
+sdk.dir=/Users/<you>/Library/Android/sdk
+
+# Free OpenWeather API key: https://home.openweathermap.org/api_keys
+# The app uses the free 2.5 endpoints (/weather and /forecast), so a
+# no-cost account is enough. A new key can take ~10 minutes to activate.
+OPENWEATHER_API_KEY=your_api_key_here

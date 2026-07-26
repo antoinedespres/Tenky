@@ -1,35 +1,60 @@
 <resources>
     <string name="app_name">Tenky</string>
+
+    <!-- Navigation -->
     <string name="title_main">Weather</string>
     <string name="title_all_cities">All cities</string>
     <string name="title_settings">Settings</string>
-    <string name="title_textview_dailyJ1">Tomorrow</string>">
-    <string name="title_textview_dailyJ2" translatable="false">J+2</string>
-    <string name="title_textview_dailyJ3" translatable="false">J+3</string>
-    <string name="title_textview_dailyJ4" translatable="false">J+4</string>
-    <string name="title_textview_dailyJ5" translatable="false">J+5</string>
-    <string name="title_textview_dailyJ6" translatable="false">J+6</string>
-    <string name="title_textview_dailyJ7" translatable="false">J+7</string>
-    <string name="title_textview_dailyJ8" translatable="false">J+8</string>
-    <string name="title_textview_dailyJ9" translatable="false">J+9</string>
-    <string name="title_no_data" translatable="false">-</string>
-    <string name="bg_description">Background corresponding to the current weather</string>
-    <string name="title_search">Search</string>
+    <string name="action_back">Back</string>
+    <string name="action_refresh">Refresh</string>
+
+    <!-- Weather screen -->
+    <string name="title_feels_like">Feels like</string>
+    <string name="title_humidity">Humidity</string>
+    <string name="title_wind_speed">Wind speed</string>
     <string name="title_sunrise">Sunrise</string>
     <string name="title_sunset">Sunset</string>
-    <string name="title_wind_speed">Wind speed</string>
-    <string name="settings_temperature_unit_desc">Enable to use imperial unit system</string>
-    <string name="settings_temperature_unit">Temperature unit</string>
-    <string name="title_humidity">Humidity</string>
-    <string name="title_feels_like">Feels like</string>
-    <string name="title_temp">Temperature</string>
-    <string name="add">Add</string>
-    <string name="cancel">Cancel</string>
-    <string name="noname">No Name Entered</string>
-    <string name="ok" translatable="false">OK</string>
-    <string name="title_city_name">City name</string>
-    <string name="title_button_clear">Clear</string>
+    <string name="title_hourly">Next 24 hours</string>
+    <string name="title_daily">5-day forecast</string>
+    <string name="label_today">Today</string>
+    <string name="label_tomorrow">Tomorrow</string>
+    <string name="bg_description">Background corresponding to the current weather</string>
+    <string name="weather_icon_description">Weather icon</string>
+    <string name="temperature_degrees">%1$d°</string>
+    <string name="temperature_range">%1$d° / %2$d°</string>
+    <string name="humidity_value">%1$d %%</string>
+    <string name="wind_speed_metric">%1$d m/s</string>
+    <string name="wind_speed_imperial">%1$d mph</string>
+
+    <!-- Cities screen -->
+    <string name="cities_empty_title">No saved cities</string>
+    <string name="cities_empty_body">Search for a city to add it to your list.</string>
+    <string name="cities_search_hint">Search for a city</string>
+    <string name="cities_search_empty">No city matches that name.</string>
+    <string name="action_add_city">Add a city</string>
+    <string name="action_remove_city">Remove %1$s</string>
+    <string name="action_clear_all">Clear all</string>
+    <string name="action_search">Search</string>
+    <string name="action_close">Close</string>
+
+    <!-- Settings screen -->
+    <string name="settings_temperature_unit">Imperial units</string>
+    <string name="settings_temperature_unit_desc">Use °F and mph instead of °C and m/s</string>
     <string name="title_credits">Credits</string>
-    <string name="title_credits_description">SVG icon pack by Those icons on flaticon.com</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="title_credits_description">SVG icon pack by Those Icons on flaticon.com</string>
+
+    <!-- Location -->
+    <string name="location_permission_title">Location needed</string>
+    <string name="location_permission_body">Tenky uses your location to show local weather. You can also pick a city instead.</string>
+    <string name="location_permission_action">Grant permission</string>
+    <string name="location_unavailable">Could not determine your location. Try picking a city instead.</string>
+
+    <!-- Errors -->
+    <string name="error_missing_api_key">No OpenWeather API key is configured. Add OPENWEATHER_API_KEY to local.properties and rebuild.</string>
+    <string name="error_invalid_api_key">The OpenWeather API key was rejected. A new key can take a few minutes to activate.</string>
+    <string name="error_network">No internet connection.</string>
+    <string name="error_rate_limited">Too many requests. Please wait a moment.</string>
+    <string name="error_not_found">No weather data for this place.</string>
+    <string name="error_unknown">Something went wrong.</string>
+    <string name="action_retry">Retry</string>
 </resources>
