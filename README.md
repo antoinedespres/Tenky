@@ -84,6 +84,21 @@ Notes on a couple of deliberate choices:
 Requires JDK 21. Kotlin comes from AGP 9's built-in Kotlin support, so there is
 no `org.jetbrains.kotlin.android` plugin in the build files.
 
+## Languages
+
+The app ships English, French and Korean, and offers an in-app language picker
+under Settings. It uses `AppCompatDelegate.setApplicationLocales`, so on Android
+13 and later the choice is also exposed in Settings → Apps → Tenky → Language.
+
+Adding a language means touching four places: a `values-<code>/strings.xml`, the
+`AppLanguage` enum, `res/xml/locales_config.xml`, and `localeFilters` in
+`app/build.gradle.kts`.
+
+Note that OpenWeather's `lang` codes are not all ISO 639-1 — Korean is `kr`, not
+`ko`. An unrecognised code is not an error; the API just answers in English. See
+`toOpenWeatherLanguage()`.
+
 ## Credits
 
-Weather icon pack by Those Icons on [flaticon.com](https://www.flaticon.com).
+Weather icon pack by Those Icons —
+[flaticon.com/packs/weather-76](https://www.flaticon.com/packs/weather-76).
