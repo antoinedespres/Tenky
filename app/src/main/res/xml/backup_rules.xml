@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Saved cities and unit preference are worth restoring to a new device. -->
+    <include
+        domain="file"
+        path="datastore/" />
+</full-backup-content>

@@ -5,38 +5,32 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <!-- Location is optional: a city can be chosen by hand instead. -->
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+
     <application
-        android:usesCleartextTraffic="true"
+        android:name=".TenkyApplication"
         android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Tenky">
 
-        <activity android:name=".settings.SettingsActivity" android:screenOrientation="sensorPortrait"/>
-
-        <activity android:name=".allcities.AllCitiesActivity"
-            android:screenOrientation="sensorPortrait">
-        </activity>
-        <activity android:name=".SplashScreenActivity"
-            android:screenOrientation="sensorPortrait">
-
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/Theme.Tenky">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-        </activity>
-        <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="sensorPortrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

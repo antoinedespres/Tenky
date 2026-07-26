@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="prussian_blue">#FF13293d</color>
+    <color name="prussian_blue">#FF13293D</color>
     <color name="sapphire_blue">#FF006494</color>
-    <color name="celadon_blue">#FF247ba0</color>
-    <color name="carolina_blue">#FF1b99e0</color>
-    <color name="azure_x_web_color">#FFe9f2f2</color>
+    <color name="celadon_blue">#FF247BA0</color>
+    <color name="carolina_blue">#FF1B99E0</color>
+    <color name="azure_x_web_color">#FFE9F2F2</color>
+    <color name="night_surface">#FF0C1B27</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

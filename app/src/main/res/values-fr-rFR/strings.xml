@@ -1,25 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Tenky</string>
+
+    <!-- Navigation -->
     <string name="title_main">Météo</string>
-    <string name="title_search">Recherche</string>
     <string name="title_all_cities">Villes</string>
     <string name="title_settings">Réglages</string>
-    <string name="title_textview_dailyJ1">Demain</string>
-    <string name="bg_description">Fond correspondant à la météo actuelle</string>
-    <string name="title_sunrise">"Lever "</string>
-    <string name="title_sunset">Coucher</string>
-    <string name="title_wind_speed">Vitesse du vent</string>
-    <string name="settings_temperature_unit_desc">Activer pour utiliser le système impérial</string>
-    <string name="settings_temperature_unit">Unité de température</string>
+    <string name="action_back">Retour</string>
+    <string name="action_refresh">Actualiser</string>
+
+    <!-- Weather screen -->
     <string name="title_feels_like">Ressenti</string>
     <string name="title_humidity">Humidité</string>
-    <string name="title_temp">Température</string>
-    <string name="add">Ajouter</string>
-    <string name="cancel">Annuler</string>
-    <string name="noname">Aucun nom saisi</string>
-    <string name="title_city_name">Nom de ville</string>
-    <string name="title_button_clear">Vider</string>
+    <string name="title_wind_speed">Vitesse du vent</string>
+    <string name="title_sunrise">Lever</string>
+    <string name="title_sunset">Coucher</string>
+    <string name="title_hourly">Prochaines 24 heures</string>
+    <string name="title_daily">Prévisions sur 5 jours</string>
+    <string name="label_today">Aujourd\'hui</string>
+    <string name="label_tomorrow">Demain</string>
+    <string name="bg_description">Fond correspondant à la météo actuelle</string>
+    <string name="weather_icon_description">Icône météo</string>
+    <string name="wind_speed_metric">%1$d m/s</string>
+    <string name="wind_speed_imperial">%1$d mph</string>
+
+    <!-- Cities screen -->
+    <string name="cities_empty_title">Aucune ville enregistrée</string>
+    <string name="cities_empty_body">Recherchez une ville pour l\'ajouter à votre liste.</string>
+    <string name="cities_search_hint">Rechercher une ville</string>
+    <string name="cities_search_empty">Aucune ville ne correspond à ce nom.</string>
+    <string name="action_add_city">Ajouter une ville</string>
+    <string name="action_remove_city">Supprimer %1$s</string>
+    <string name="action_clear_all">Tout effacer</string>
+    <string name="action_search">Rechercher</string>
+    <string name="action_close">Fermer</string>
+
+    <!-- Settings screen -->
+    <string name="settings_temperature_unit">Unités impériales</string>
+    <string name="settings_temperature_unit_desc">Utiliser °F et mph au lieu de °C et m/s</string>
     <string name="title_credits">Crédits</string>
-    <string name="title_credits_description">Pack d\'icônes de Those icons sur flaticon.com</string>
+    <string name="title_credits_description">Pack d\'icônes de Those Icons sur flaticon.com</string>
+
+    <!-- Location -->
+    <string name="location_permission_title">Localisation requise</string>
+    <string name="location_permission_body">Tenky utilise votre position pour afficher la météo locale. Vous pouvez aussi choisir une ville.</string>
+    <string name="location_permission_action">Autoriser</string>
+    <string name="location_unavailable">Impossible de déterminer votre position. Choisissez plutôt une ville.</string>
+
+    <!-- Errors -->
+    <string name="error_missing_api_key">Aucune clé API OpenWeather configurée. Ajoutez OPENWEATHER_API_KEY à local.properties puis recompilez.</string>
+    <string name="error_invalid_api_key">La clé API OpenWeather a été refusée. Une nouvelle clé peut prendre quelques minutes à s\'activer.</string>
+    <string name="error_network">Pas de connexion Internet.</string>
+    <string name="error_rate_limited">Trop de requêtes. Veuillez patienter un instant.</string>
+    <string name="error_not_found">Aucune donnée météo pour ce lieu.</string>
+    <string name="error_unknown">Une erreur est survenue.</string>
+    <string name="action_retry">Réessayer</string>
 </resources>
