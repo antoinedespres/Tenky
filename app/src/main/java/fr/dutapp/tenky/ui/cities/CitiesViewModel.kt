@@ -30,8 +30,12 @@ data class CityRow(
     val iconCode: String? = null,
 )
 
+/** A city removed by a swipe, kept just long enough to offer an undo. */
+data class RemovedCity(val city: SavedCity, val index: Int)
+
 data class CitiesUiState(
     val rows: List<CityRow> = emptyList(),
+    val lastRemoved: RemovedCity? = null,
     val unit: TemperatureUnit = TemperatureUnit.METRIC,
     val query: String = "",
     val searchResults: List<SavedCity> = emptyList(),
@@ -141,10 +145,49 @@ class CitiesViewModel(
     }
 
     fun removeCity(city: SavedCity) {
+        val index = _uiState.value.rows.indexOfFirst { it.city.sameAs(city) }
+        // A dismiss gesture can report the same removal more than once. The
+        // second call no longer finds the row, so it must leave the pending
+        // undo alone rather than clearing it.
+        if (index < 0) return
+
         viewModelScope.launch { savedCitiesRepository.remove(city) }
         _uiState.update { state ->
-            state.copy(rows = state.rows.filterNot { it.city.sameAs(city) })
+            state.copy(
+                rows = state.rows.filterNot { it.city.sameAs(city) },
+                // Held so the removal can be undone from a snackbar; a swipe is
+                // easy to trigger by accident.
+                lastRemoved = RemovedCity(city, index),
+            )
         }
+    }
+
+    fun undoRemove() {
+        val removed = _uiState.value.lastRemoved ?: return
+        viewModelScope.launch { savedCitiesRepository.insert(removed.index, removed.city) }
+        _uiState.update { it.copy(lastRemoved = null) }
+    }
+
+    fun onUndoDismissed() = _uiState.update { it.copy(lastRemoved = null) }
+
+    /** Reorders locally while the drag is in flight; nothing is written yet. */
+    fun moveCity(fromIndex: Int, toIndex: Int) {
+        _uiState.update { state ->
+            if (fromIndex !in state.rows.indices || toIndex !in state.rows.indices) {
+                state
+            } else {
+                state.copy(
+                    rows = state.rows.toMutableList()
+                        .apply { add(toIndex, removeAt(fromIndex)) },
+                )
+            }
+        }
+    }
+
+    /** Commits the order once the drag ends. */
+    fun onReorderFinished() {
+        val cities = _uiState.value.rows.map { it.city }
+        viewModelScope.launch { savedCitiesRepository.replaceAll(cities) }
     }
 
     fun clearAll() {
