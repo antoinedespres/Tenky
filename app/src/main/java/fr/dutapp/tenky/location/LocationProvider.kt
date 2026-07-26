@@ -29,8 +29,11 @@ sealed interface LocationResult {
 /**
  * Resolves the device's position using the platform [LocationManager].
  *
- * This deliberately avoids Play Services' fused provider: the app targets
- * devices without Google Play Services, where the fused client never returns.
+ * Everything goes through the platform API rather than the Play Services
+ * location client, so the app still works on devices without Google Play
+ * Services. Where the platform does expose a fused provider it is used, since
+ * it is the one that resolves indoors — but its absence only costs accuracy,
+ * never a crash or a hang.
  */
 class LocationProvider(private val context: Context) {
 
@@ -54,7 +57,7 @@ class LocationProvider(private val context: Context) {
         }
 
         val live = withTimeoutOrNull(LIVE_FIX_TIMEOUT_MILLIS) {
-            manager.awaitSingleUpdate()
+            manager.awaitFirstFix()
         }
         return live?.let { LocationResult.Available(it.toCoordinates()) }
             ?: LocationResult.Unavailable
@@ -69,33 +72,52 @@ class LocationProvider(private val context: Context) {
         }
         .maxByOrNull(Location::getTime)
 
+    /**
+     * Listens on every enabled provider at once and takes the first fix.
+     *
+     * Asking only the first enabled provider meant a device with GPS as its
+     * only enabled provider waited out the whole timeout indoors, where a cold
+     * GPS fix rarely arrives, even though a coarse fix was available elsewhere.
+     */
     @SuppressLint("MissingPermission") // Guarded by hasPermission() above.
-    private suspend fun LocationManager.awaitSingleUpdate(): Location? {
-        val provider = PROVIDERS.firstOrNull { isProviderEnabledSafely(it) } ?: return null
+    private suspend fun LocationManager.awaitFirstFix(): Location? {
+        val providers = PROVIDERS.filter { isProviderEnabledSafely(it) }
+        if (providers.isEmpty()) return null
 
         return suspendCancellableCoroutine { continuation ->
-            // android.location.LocationListener only gained default methods in
-            // API 30, so every method is implemented for older devices.
-            val listener = object : LocationListener {
-                override fun onLocationChanged(location: Location) {
-                    removeUpdates(this)
-                    if (continuation.isActive) continuation.resume(location)
+            val listeners = mutableListOf<LocationListener>()
+
+            fun stopListening() {
+                listeners.forEach { listener -> runCatching { removeUpdates(listener) } }
+                listeners.clear()
+            }
+
+            providers.forEach { provider ->
+                // android.location.LocationListener only gained default methods
+                // in API 30, so every method is implemented for older devices.
+                val listener = object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        stopListening()
+                        if (continuation.isActive) continuation.resume(location)
+                    }
+
+                    override fun onProviderDisabled(provider: String) = Unit
+                    override fun onProviderEnabled(provider: String) = Unit
+
+                    @Deprecated("Required for API < 30", ReplaceWith(""))
+                    override fun onStatusChanged(
+                        provider: String?,
+                        status: Int,
+                        extras: Bundle?,
+                    ) = Unit
                 }
-
-                override fun onProviderDisabled(provider: String) = Unit
-                override fun onProviderEnabled(provider: String) = Unit
-
-                @Deprecated("Required for API < 30", ReplaceWith(""))
-                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) = Unit
+                listeners += listener
+                runCatching {
+                    requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())
+                }
             }
 
-            continuation.invokeOnCancellation { removeUpdates(listener) }
-
-            runCatching {
-                requestLocationUpdates(provider, 0L, 0f, listener, Looper.getMainLooper())
-            }.onFailure {
-                if (continuation.isActive) continuation.resume(null)
-            }
+            continuation.invokeOnCancellation { stopListening() }
         }
     }
 
@@ -110,14 +132,34 @@ class LocationProvider(private val context: Context) {
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
 
-        /** Network first: it resolves indoors and far faster than GPS. */
+        /**
+         * Every provider worth asking, coarse and cheap before precise and slow.
+         *
+         * "fused" is the platform's combined provider. It is only a public
+         * constant from API 31, but the string works on older releases where
+         * the device supplies one, and simply reports as disabled where it does
+         * not — so this stays a plain LocationManager call with no Play
+         * Services dependency.
+         */
+        private const val FUSED_PROVIDER = "fused"
+
         private val PROVIDERS = listOf(
+            FUSED_PROVIDER,
             LocationManager.NETWORK_PROVIDER,
             LocationManager.GPS_PROVIDER,
             LocationManager.PASSIVE_PROVIDER,
         )
 
-        private const val MAX_CACHED_FIX_AGE_MILLIS = 10 * 60 * 1000L
-        private const val LIVE_FIX_TIMEOUT_MILLIS = 15_000L
+        /**
+         * How stale a cached fix may be before a live one is requested.
+         *
+         * Generous on purpose: the weather a few kilometres from where the
+         * phone last had a fix is the same weather, and waiting on a cold GPS
+         * lock to refine that is a poor trade.
+         */
+        private const val MAX_CACHED_FIX_AGE_MILLIS = 2 * 60 * 60 * 1000L
+
+        /** A cold GPS lock can take well over the 15s this used to allow. */
+        private const val LIVE_FIX_TIMEOUT_MILLIS = 30_000L
     }
 }
